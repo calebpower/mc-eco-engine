@@ -13,7 +13,6 @@ import java.util.UUID;
  */
 public class Recipe {
 
-  private String label = null;
   private UUID id = null;
   private UUID product = null;
   private Map<UUID, Integer> ingredients = new HashMap<>();
@@ -52,7 +51,6 @@ public class Recipe {
    * Instantiates a {@link Recipe} object.
    *
    * @param id the unique {@link UUID} associated with this recipe
-   * @param label the human-readable label associated with the recipe
    * @param product the unique {@link UUID} associated with the product of this
    *        recipe
    * @param workMethod the {@link Work} method associated with the mutation
@@ -62,7 +60,6 @@ public class Recipe {
    */
   public Recipe(UUID id, String label, UUID product, Work workMethod, double workAmount) {
     this.id = id;
-    this.label = label;
     this.product = product;
     this.workMethod = workMethod;
     this.workAmount = workAmount;
@@ -76,7 +73,6 @@ public class Recipe {
    */
   public Recipe(UUID id, Recipe recipe) {
     this.id = id;
-    this.label = recipe.label;
     this.product = recipe.product;
     this.workMethod = recipe.workMethod;
     this.workAmount = recipe.workAmount;
@@ -90,24 +86,6 @@ public class Recipe {
    */
   public UUID getID() {
     return id;
-  }
-
-  /**
-   * Retrieves the label associated with the recipe.
-   *
-   * @return the recipe's label
-   */
-  public String getLabel() {
-    return label;
-  }
-
-  /**
-   * Sets the label associated with the recipe.
-   *
-   * @param the recipe's label
-   */
-  public void setLabel(String label) {
-    this.label = label;
   }
 
   /**
