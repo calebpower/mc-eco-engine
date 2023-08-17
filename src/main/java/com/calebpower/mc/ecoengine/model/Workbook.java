@@ -16,6 +16,7 @@ public class Workbook {
   private UUID id = null;
   private UUID parent = null;
   private Set<UUID> children = new HashSet<>();
+  private Set<UUID> supportedCommodities = new HashSet<>();
   private String description = null;
   private Timestamp timeCreated = null;
   private Timestamp timeModified = null;
@@ -48,6 +49,7 @@ public class Workbook {
     this.parent = parent.parent;
     this.description = parent.description;
     this.children.addAll(parent.children);
+    this.supportedCommodities.addAll(parent.supportedCommodities);
   }
 
   /**
@@ -96,6 +98,34 @@ public class Workbook {
     children.remove(child);
   }
 
+  /**
+   * Retrieves the set of unique identifiers associated with commodities
+   * supported by this workbook.
+   *
+   * @return an unmodifiable {@link Set} comprised of unique {@link UUID} objects
+   */
+  public Set<UUID> getSupportedCommodities() {
+    return Collections.unmodifiableSet(supportedCommodities);
+  }
+
+  /**
+   * Adds a commodity to the list of commodities supported by this workbook.
+   *
+   * @param commodity the unique {@link UUID} of the commodity to support
+   */
+  public void addSupportedCommodity(UUID commodity) {
+    supportedCommodities.add(commodity);
+  }
+
+  /**
+   * Removes a commodity from the list of commodities supported by this workbook.
+   *
+   * @param the unique {@link UUID} of the commodity for which to remove support
+   */
+  public void removeSupportedCommodity(UUID commodity) {
+    supportedCommodities.remove(commodity);
+  }
+  
   /**
    * Retrieves this workbook's description.
    *

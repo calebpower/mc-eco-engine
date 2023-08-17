@@ -27,9 +27,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import com.calebpower.mc.ecoengine.model.Commodity;
+import com.calebpower.mc.ecoengine.model.Recipe;
+import com.calebpower.mc.ecoengine.model.Workbook;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -209,10 +213,152 @@ public class Database {
         if(null != stmt)
           try {
             stmt.close();
-          } catch(SQLException e) {
-          }
+          } catch(SQLException e) { }
       }
     }
+  }
+
+  /**
+   * Retrieves the set of all known commodities.
+   *
+   * @return a {@link Set} of {@link Commodity} objects
+   * @throws SQLException if a database malfunction occurs
+   */
+  public Set<Commodity> getCommodities() throws SQLException {
+    return null;
+  }
+
+  /**
+   * Retrieves a particular commodity.
+   *
+   * @param id the commodity's unique {@link UUID}
+   * @return a {@link Commodity} object, if one exists with an ID matching the
+   *         one provided, or {@code null} if no such commodity exists
+   * @throws SQLException if a database malfunction occurs
+   */
+  public Commodity getCommodity(UUID id) throws SQLException {
+    return null;
+  }
+
+  /**
+   * Adds a commodity to the database if it does not already exist. Otherwise,
+   * updates the existing record.
+   *
+   * @param commodity the {@link Commodity} object to store in the database
+   * @return {@code true} if a new record was added;
+   *         {@code false} if an existing record was updated
+   * @throws SQLException if a database malfunction occurs
+   */
+  public boolean setCommodity(Commodity commodity) throws SQLException {
+    return false;
+  }
+
+  /**
+   * Removes a commodity from the database.
+   *
+   * @param id the commodity's unique {@link UUID}
+   * @return {@code true} iff the commodity was in the database and subsequently
+   *         removed from the database without issue
+   * @throws SQLException if a database malfunction occurs
+   */
+  public boolean deleteCommodity(UUID id) throws SQLException {
+    return false;
+  }
+
+  /**
+   * Retrieves the set of all known recipes associated with a particular
+   * workbook.
+   *
+   * @param workbook the workbook's unique {@link UUID}
+   * @return a {@link Set} of {@link Recipe} objects
+   * @throws SQLException if a database error occurs
+   */
+  public Set<Recipe> getWorkbookRecipes(UUID workbook) throws SQLException {
+    return null;
+  }
+
+  /**
+   * Retrieves a particular recipe.
+   *
+   * @param id the recipe's unique {@link UUID}
+   * @return a {@link Recipe} object, if one exists with an ID matching the one
+   *         provided, or {@code null} if no such recipe exists
+   * @throws SQLException if a database malfunction occurs
+   */
+  public Recipe getRecipe(UUID id) {
+    return null;
+  }
+
+  /**
+   * Adds a recipe to the database if it does not already exist. Otherwise,
+   * updates the existing record.
+   *
+   * @param recipe the {@link Recipe} object to store in the database
+   * @return {@code true} if a new record was added;
+   *         {@code false} if an existing record was updated
+   * @throws SQLException if a database malfunction occurs
+   */
+  public boolean setRecipe(Recipe recipe) throws SQLException {
+    return false;
+  }
+
+  /**
+   * Removes a recipe from the database.
+   *
+   * @param id the recipe's unique {@link UUID}
+   * @return {@code true} iff the recipe was in the database and subsequently
+   *         removed from the database without issue
+   * @throws SQLException if a database malfunction occurs
+   */
+  public boolean deleteRecipe(UUID id) throws SQLException {
+    return false;
+  }
+
+  /**
+   * Retrieves the set of all known workbooks.
+   *
+   * @return a {@link Set} of {@link Workbook} objects
+   * @throws SQLException if a database malfunction occurs
+   */
+  public Set<Workbook> getWorkbooks() {
+    return null;
+  }
+
+  /**
+   * Retrieves a particular workbook.
+   *
+   * @param id the workbook's unique {@link UUID}
+   * @return a {@link Workbook} object, if one exists with an ID matching the
+   *         one provided, or {@code null} if no such workbook exists
+   * @throws SQLException if a database malfunction occurs
+   */
+  public Workbook getWorkbook(UUID id) {
+    return null;
+  }
+
+  /**
+   * Adds a commodity to the database if it does not already exist. Otherwise,
+   * updates the existing record.
+   *
+   * @param workbook the {@link Workbook} object to store in the database
+   * @return {@code true} if a new record was added;
+   *         {@code false} if an existing record was updated
+   * @throws SQLException if a database malfunction occurs
+   */
+  public boolean setWorkbook(Workbook workbook) throws SQLException {
+    return false;
+  }
+
+  /**
+   * Removes a workbook from the database.
+   *
+   * @param id the workbook's unique {@link UUID}
+   * @return {@code true} iff the workbook was in the database and subsequently
+   *         removed from the database without issue
+   * @throws SQLException if a database malfunction occurs
+   */
+  public boolean deleteWorkbook(UUID id) throws SQLException {
+    return false;
   }
   
 }

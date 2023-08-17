@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS ${database}.${prefix}workbook (
+  id BINARY(16) NOT NULL,
+  parent BINARY(16),
+  description VARCHAR(255) NOT NULL,
+  creation_time TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
+    NOT NULL,
+  last_update TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
+    ON UPDATE CURRENT_TIMESTAMP
+    NOT NULL,
+  PRIMARY KEY (id)
+  FOREIGN KEY (parent) REFERENCES ${prefix}workbook
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
+)Engine=InnoDB;

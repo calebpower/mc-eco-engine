@@ -15,9 +15,10 @@ public class Recipe {
 
   private UUID id = null;
   private UUID product = null;
+  private UUID workbook = null;
   private Map<UUID, Integer> ingredients = new HashMap<>();
   private Work workMethod = null;
-  private double workAmount = 0d;
+  private float workAmount = 0f;
 
   /**
    * Describes the manner in which the item is generated.
@@ -51,6 +52,8 @@ public class Recipe {
    * Instantiates a {@link Recipe} object.
    *
    * @param id the unique {@link UUID} associated with this recipe
+   * @param workbook the unique {@link UUID} associated with the workbook
+   *        containing this particular recipe
    * @param product the unique {@link UUID} associated with the product of this
    *        recipe
    * @param workMethod the {@link Work} method associated with the mutation
@@ -58,8 +61,9 @@ public class Recipe {
    * @param workAmount the amount of work that needs to be put into the
    *        transition
    */
-  public Recipe(UUID id, String label, UUID product, Work workMethod, double workAmount) {
+  public Recipe(UUID id, UUID workbook, String label, UUID product, Work workMethod, float workAmount) {
     this.id = id;
+    this.workbook = workbook;
     this.product = product;
     this.workMethod = workMethod;
     this.workAmount = workAmount;
@@ -80,7 +84,7 @@ public class Recipe {
   }
 
   /**
-   * Retrieves the recipe's public identifier.
+   * Retrieves the recipe's unique identifier.
    *
    * @return the recipe's unique {@link UUID}
    */
@@ -88,6 +92,15 @@ public class Recipe {
     return id;
   }
 
+  /**
+   * Retrieves the parent workbook's unique identifier.
+   *
+   * @return the workbook's unique {@link UUID}
+   */
+  public UUID getWorkbook() {
+    return workbook;
+  }
+  
   /**
    * Retrieves the unique identifier of the product that this recipe is supposed
    * to generate.
@@ -151,7 +164,7 @@ public class Recipe {
    *
    * @return some quantity or amount of work
    */
-  public double getWorkAmount() {
+  public float getWorkAmount() {
     return workAmount;
   }
 
@@ -162,7 +175,7 @@ public class Recipe {
    * @param method the {@link Work} method required
    * @param amount the quantity or amount of work required
    */
-  public void setWork(Work method, double amount) {
+  public void setWork(Work method, float amount) {
     this.workMethod = method;
     this.workAmount = amount;
   }
