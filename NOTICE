@@ -1,0 +1,116 @@
+MC Eco Engine
+Copyright (c) 2023 Caleb L. Power et. al.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+copy, modify, take inspiration from, or otherwise use this software or the files
+herein except in compliance with the License. You may obtain a copy of the
+License at
+
+  https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+
+===
+
+The Initial Developer of some parts of this software, particularly those used in
+parsing and applying configuration settings, handling database interactions, and
+coordinating the API layer, is Axonibyte Innovations, LLC (https://axonibyte.com).
+
+Copyright (c) 2019-2023 Axonibyte Innovations, LLC. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+===
+
+The Initial Developer of some parts of this software, used in the loading of
+various files, including commons-io, is the Apache Software Foundation
+(https://www.apache.org).
+
+Apache Commons IO
+Copyright (c) 2002-2023 The Apache Software Foundation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+===
+
+The Initial Developer of some parts of this software, particularly the underlying
+database driver, is Brett Wooldridge.
+
+HikariCP
+Copyright (c) 2013-2023 Brett Wooldridge. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+===
+
+The Initial Developer of some parts of this software, in particular the build
+environment, is the original author or authors, and is released by Gradle Inc.
+(https://gradle.org).
+
+Gradle
+Copyright (c) 2008-2023 the original author or authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+===
+
+The Initial Developer of some parts of this software, in particular the Shadow
+JAR plugin, is John Engelman.
+
+Gradle-Shadow-Plugin
+Copyright (c) 2013 John Engelman. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

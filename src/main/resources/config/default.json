@@ -1,0 +1,18 @@
+{
+  "api": {
+    "port": 13535,
+    "allowedOrigins": "*",
+    "requireAuth": true
+  },
+  "db": {
+    "endpoint": "127.0.0.1:3306",
+    "username": "myUser",
+    "password": "pass123!",
+    "prefix": "eco_",
+    "database": "eco_engine",
+    "secure": true
+  },
+  "log": {
+    "debug": true
+  }
+}
