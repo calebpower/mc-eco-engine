@@ -32,7 +32,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -576,14 +575,18 @@ public class Database {
       var oldIngredients = getRecipe(recipe.getID()).getIngredients();
       Set<UUID> staleIngredients = new HashSet<>();
       ingredients = new HashMap<>();
-      for(var ingredient : oldIngredients.entrySet()) {
-        if(!recipe.getIngredients().containsKey(ingredient.getKey()))
+
+      for(var ingredient : recipe.getIngredients().entrySet())
+        if(!oldIngredients.containsKey(ingredient.getKey()))
           ingredients.put(ingredient.getKey(), ingredient.getValue());
+      
+      for(var ingredient : oldIngredients.entrySet())
+        if(!recipe.getIngredients().containsKey(ingredient.getKey()))
+          staleIngredients.add(ingredient.getKey());
         else if(recipe.getIngredients().get(ingredient.getKey()) != ingredient.getValue()) {
           staleIngredients.add(ingredient.getKey());
           ingredients.put(ingredient.getKey(), ingredient.getValue());
         }
-      }
 
       if(!staleIngredients.isEmpty()) {
         SQLBuilder rmStaleIngredientStmt = new SQLBuilder()
@@ -620,6 +623,7 @@ public class Database {
         stmt.setBytes(1, idBytes);
         stmt.setBytes(2, SQLBuilder.uuidToBytes(ingredient.getKey()));
         stmt.setInt(3, ingredient.getValue());
+        stmt.executeUpdate();
       }
     }
 
@@ -658,7 +662,78 @@ public class Database {
    * @throws SQLException if a database malfunction occurs
    */
   public Set<Workbook> getWorkbooks() throws SQLException {
-    return null;
+    Map<UUID, Workbook> workbooks = new HashMap<>();
+    Connection con = getConnection();
+    
+    PreparedStatement stmt = con.prepareStatement(
+        new SQLBuilder().select(
+            dbPrefix + "workbook",
+            "w.id",
+            "w.parent",
+            "w.description",
+            "w.creation_time",
+            "w.last_update",
+            "c.commodity")
+        .tableAlias("w")
+        .join(
+            Join.LEFT,
+            dbPrefix + "workbook_commodities",
+            "c",
+            "w.id",
+            "c.workbook",
+            Comparison.EQUAL_TO)
+        .toString());
+    ResultSet res = stmt.executeQuery();
+
+    while(res.next()) {
+      UUID id = SQLBuilder.bytesToUUID(res.getBytes("w.id"));
+      Workbook workbook = null;
+      if(workbooks.containsKey(id))
+        workbook = workbooks.get(id);
+      else
+        workbooks.put(
+            id,
+            workbook = new Workbook(
+                id,
+                SQLBuilder.bytesToUUID(
+                    res.getBytes("w.parent")),
+                res.getString("w.description"),
+                res.getTimestamp("w.creation_time"),
+                res.getTimestamp("w.last_update")));
+
+      UUID commodity = SQLBuilder.bytesToUUID(res.getBytes("c.commodity"));
+      if(null != commodity) workbook.addSupportedCommodity(commodity);
+    }
+
+    if(!workbooks.isEmpty()) {
+      SQLBuilder getChildrenStmt = new SQLBuilder()
+        .select(dbPrefix + "workbook", "id", "parent");
+
+      for(int i = 0; i < workbooks.size(); i++) {
+        getChildrenStmt.where("parent");
+        if(0 == i) getChildrenStmt.or();
+      }
+
+      close(null, stmt, res);
+      stmt = con.prepareStatement(getChildrenStmt.toString());
+
+      int idx = 0;
+      for(var workbook : workbooks.entrySet())
+        stmt.setBytes(++idx, SQLBuilder.uuidToBytes(workbook.getKey()));
+
+      res = stmt.executeQuery();
+
+      while(res.next())
+        workbooks.get(
+            SQLBuilder.bytesToUUID(
+                res.getBytes("parent")))
+          .addChild(
+              SQLBuilder.bytesToUUID(
+                  res.getBytes("id")));
+    }
+
+    close(con, stmt, res);
+    return Set.copyOf(workbooks.values());
   }
 
   /**
@@ -670,7 +745,63 @@ public class Database {
    * @throws SQLException if a database malfunction occurs
    */
   public Workbook getWorkbook(UUID id) throws SQLException {
-    return null;
+    if(null == id) return null;
+
+    Connection con = getConnection();
+    PreparedStatement stmt = con.prepareStatement(
+        new SQLBuilder().select(
+            dbPrefix + "workbook",
+            "w.parent",
+            "w.description",
+            "w.creation_time",
+            "w.last_update",
+            "c.commodity")
+        .tableAlias("w")
+        .join(
+            Join.LEFT,
+            dbPrefix + "workbook_commodities",
+            "c",
+            "w.id",
+            "c.workbook",
+            Comparison.EQUAL_TO)
+        .where("w.id")
+        .toString());
+    stmt.setBytes(1, SQLBuilder.uuidToBytes(id));
+    ResultSet res = stmt.executeQuery();
+
+    Workbook workbook = null;
+    while(res.next()) {
+      if(null == workbook)
+        workbook = new Workbook(
+            id,
+            SQLBuilder.bytesToUUID(
+                res.getBytes("w.parent")),
+            res.getString("w.description"),
+            res.getTimestamp("w.creation_time"),
+            res.getTimestamp("w.last_update"));
+
+      UUID commodity = SQLBuilder.bytesToUUID(res.getBytes("c.commodity"));
+      if(null != commodity) workbook.addSupportedCommodity(commodity);
+    }
+
+    if(null != workbook) {
+      stmt = con.prepareStatement(
+          new SQLBuilder().select(
+              dbPrefix + "workbook",
+              "id")
+          .where("parent")
+          .toString());
+      stmt.setBytes(1, SQLBuilder.uuidToBytes(id));
+      res = stmt.executeQuery();
+
+      while(res.next())
+        workbook.addChild(
+            SQLBuilder.bytesToUUID(
+                res.getBytes("id")));
+    }
+
+    close(con, stmt, res);
+    return workbook;
   }
 
   /**
@@ -683,7 +814,92 @@ public class Database {
    * @throws SQLException if a database malfunction occurs
    */
   public boolean setWorkbook(Workbook workbook) throws SQLException {
-    return false;
+    Objects.requireNonNull(workbook);
+    byte[] idBytes = SQLBuilder.uuidToBytes(workbook.getID());
+
+    Connection con = getConnection();
+    PreparedStatement stmt = con.prepareStatement(
+        new SQLBuilder().select(
+            dbPrefix + "workbook",
+            "parent",
+            "description")
+        .where("id")
+        .toString());
+    stmt.setBytes(1, SQLBuilder.uuidToBytes(workbook.getParent()));
+    stmt.setString(2, workbook.getDescription());
+    stmt.setBytes(3, idBytes);
+
+    Set<UUID> commodities = null;
+
+    boolean isNew = false;
+    if(isNew = 0 >= stmt.executeUpdate()) {
+      close(null, stmt, null);
+      stmt = con.prepareStatement(
+          new SQLBuilder().insert(
+              dbPrefix + "workbook",
+              "parent",
+              "description",
+              "id")
+          .toString());
+      stmt.setBytes(1, SQLBuilder.uuidToBytes(workbook.getParent()));
+      stmt.setString(2, workbook.getDescription());
+      stmt.setBytes(3, idBytes);
+      stmt.executeUpdate();
+
+      commodities = workbook.getSupportedCommodities();
+    } else {
+      var oldCommodities = getWorkbook(workbook.getID()).getSupportedCommodities();
+      Set<UUID> staleCommodities = new HashSet<>();
+      commodities = new HashSet<>();
+
+      for(var commodity : workbook.getSupportedCommodities()) {
+        if(!oldCommodities.contains(commodity))
+          commodities.add(commodity);
+      }
+
+      for(var commodity : oldCommodities)
+        if(!workbook.getSupportedCommodities().contains(commodity))
+          staleCommodities.add(commodity);
+
+      if(!staleCommodities.isEmpty()) {
+        SQLBuilder rmStaleCommodityStmt = new SQLBuilder()
+          .delete(dbPrefix + "workbook_commodities")
+          .where("workbook");
+
+        for(int i = 0; i < staleCommodities.size(); i++) {
+          rmStaleCommodityStmt.where("commodity");
+          if(0 == i) rmStaleCommodityStmt.or();
+        }
+
+        close(null, stmt, null);
+        stmt = con.prepareStatement(rmStaleCommodityStmt.toString());
+        stmt.setBytes(1, idBytes);
+        int idx = 1;
+        for(var stale : staleCommodities)
+          stmt.setBytes(++idx, SQLBuilder.uuidToBytes(stale));
+
+        stmt.executeUpdate();
+      }
+    }
+
+    if(!commodities.isEmpty()) {
+      String addCommodityStmt = new SQLBuilder()
+        .insert(
+            dbPrefix + "workbook_commodities",
+            "workbook",
+            "commodity")
+        .toString();
+      for(var commodity : commodities) {
+        close(null, stmt, null);
+        stmt = con.prepareStatement(addCommodityStmt);
+        stmt.setBytes(1, idBytes);
+        stmt.setBytes(2, SQLBuilder.uuidToBytes(commodity));
+        stmt.executeUpdate();
+      }
+    }
+
+    close(con, stmt, null);
+    return isNew;
   }
 
   /**
@@ -695,7 +911,47 @@ public class Database {
    * @throws SQLException if a database malfunction occurs
    */
   public boolean deleteWorkbook(UUID id) throws SQLException {
-    return false;
+    if(null == id) return false;
+    byte[] idBytes = SQLBuilder.uuidToBytes(id);
+
+    Connection con = getConnection();
+    PreparedStatement stmt = con.prepareStatement(
+        new SQLBuilder().select(
+            dbPrefix + "workbook",
+            "parent")
+        .where("id")
+        .limit(1)
+        .toString());
+    stmt.setBytes(1, idBytes);
+    ResultSet res = stmt.executeQuery();
+
+    if(res.next()) {
+      byte[] parent = res.getBytes("parent");
+      close(null, stmt, res);
+      
+      stmt = con.prepareStatement(
+          new SQLBuilder().update(
+              dbPrefix + "workbook",
+              "parent")
+          .where("parent")
+          .toString());
+      stmt.setBytes(1, parent);
+      stmt.setBytes(2, idBytes);
+      stmt.executeUpdate();
+
+      close(null, stmt, null);
+    } else close(null, stmt, res);
+
+    stmt = con.prepareStatement(
+        new SQLBuilder().delete(
+            dbPrefix + "workbook")
+        .where("id")
+        .toString());
+    stmt.setBytes(1, idBytes);
+    boolean success = 0 < stmt.executeUpdate();
+
+    close(con, stmt, null);
+    return success;
   }
   
 }
