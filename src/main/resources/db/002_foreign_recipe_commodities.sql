@@ -1,8 +1,7 @@
-CREATE TABLE IF NOT EXISTS ${database}.${prefix}recipe_commodities (
+CREATE TABLE IF NOT EXISTS ${database}.${prefix}recipe_ingredients (
   recipe BINARY(16) NOT NULL,
   commodity BINARY(16) NOT NULL,
   amount TINYINT UNSIGNED NOT NULL,
-  is_product BIT NOT NULL,
   last_update TIMESTAMP
     DEFAULT CURRENT_TIMESTAMP
     NOT NULL,

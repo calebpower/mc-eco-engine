@@ -25,15 +25,23 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import com.calebpower.mc.ecoengine.db.SQLBuilder.Comparison;
+import com.calebpower.mc.ecoengine.db.SQLBuilder.Join;
 import com.calebpower.mc.ecoengine.model.Commodity;
 import com.calebpower.mc.ecoengine.model.Recipe;
 import com.calebpower.mc.ecoengine.model.Workbook;
+import com.calebpower.mc.ecoengine.model.Recipe.Work;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -151,18 +159,15 @@ public class Database {
   public void close(Connection con, PreparedStatement stmt, ResultSet res) {
     try {
       if(null != res) res.close();
-    } catch(SQLException e) {
-    }
+    } catch(SQLException e) { }
     
     try {
       if(null != stmt) stmt.close();
-    } catch(SQLException e) {
-    }
+    } catch(SQLException e) { }
     
     try {
       if(null != con) con.close();
-    } catch(SQLException e) {
-    }
+    } catch(SQLException e) { }
   }
   
   /**
@@ -225,7 +230,58 @@ public class Database {
    * @throws SQLException if a database malfunction occurs
    */
   public Set<Commodity> getCommodities() throws SQLException {
-    return null;
+    Map<UUID, Commodity> commodities = new HashMap<>();
+    Connection con = getConnection();
+
+    PreparedStatement stmt = con.prepareStatement(
+        new SQLBuilder().select(
+            dbPrefix + "commodity",
+            "c.id",
+            "c.label",
+            "r.recipe")
+            .tableAlias("c")
+            .join(
+                Join.LEFT,
+                dbPrefix + "recipe_commodities",
+                "r",
+                "c.id",
+                "r.commodity",
+                Comparison.EQUAL_TO)
+            .toString());
+    ResultSet res = stmt.executeQuery();
+    
+    while(res.next()) {
+      UUID id = SQLBuilder.bytesToUUID(res.getBytes("c.id"));
+      Commodity commodity = null;
+      if(commodities.containsKey(id))
+        commodity = commodities.get(id);
+      else
+        commodities.put(id, commodity = new Commodity(id, res.getString("c.label")));
+      
+      UUID recipe = SQLBuilder.bytesToUUID(res.getBytes("r.recipe"));
+      if(null != recipe) commodity.addUsage(recipe);
+    }
+
+    final String recipeQuery = new SQLBuilder().select(
+        dbPrefix + "recipe",
+        "id")
+      .where("product")
+      .toString();
+    
+    for(var id : commodities.keySet()) {
+      close(null, stmt, res);
+      stmt = con.prepareStatement(recipeQuery);
+      stmt.setBytes(1, SQLBuilder.uuidToBytes(id));
+      res = stmt.executeQuery();
+
+      while(res.next())
+        commodities.get(id).addRecipe(
+            SQLBuilder.bytesToUUID(
+                res.getBytes("id")));
+    }
+
+    close(con, stmt, res);
+    return Set.copyOf(commodities.values());
   }
 
   /**
@@ -237,7 +293,56 @@ public class Database {
    * @throws SQLException if a database malfunction occurs
    */
   public Commodity getCommodity(UUID id) throws SQLException {
-    return null;
+    if(null == id) return null;
+    
+    Connection con = getConnection();
+    PreparedStatement stmt = con.prepareStatement(
+        new SQLBuilder().select(
+            dbPrefix + "commodity",
+            "c.label",
+            "r.recipe",
+            "r.is_product")
+        .tableAlias("c")
+        .join(
+            Join.LEFT,
+            dbPrefix + "recipe_commodities",
+            "r",
+            "c.id",
+            "r.commodity",
+            Comparison.EQUAL_TO)
+        .where("c.id")
+        .toString());
+    stmt.setBytes(1, SQLBuilder.uuidToBytes(id));
+    ResultSet res = stmt.executeQuery();
+
+    Commodity commodity = null;
+    while(res.next()) {
+      if(null == commodity)
+        commodity = new Commodity(id, res.getString("c.label"));
+      
+      UUID recipe = SQLBuilder.bytesToUUID(res.getBytes("r.recipe"));
+      if(null != recipe) commodity.addUsage(recipe);
+    }
+
+    if(null != commodity) {
+      close(null, stmt, res);
+      stmt = con.prepareStatement(
+          new SQLBuilder().select(
+              dbPrefix + "recipe",
+              "id")
+              .where("product")
+              .toString());
+      stmt.setBytes(1, SQLBuilder.uuidToBytes(commodity.getID()));
+      res = stmt.executeQuery();
+      
+      while(res.next())
+        commodity.addRecipe(
+            SQLBuilder.bytesToUUID(
+                res.getBytes("id")));
+    }
+
+    close(con, stmt, res);
+    return commodity;
   }
 
   /**
@@ -250,7 +355,33 @@ public class Database {
    * @throws SQLException if a database malfunction occurs
    */
   public boolean setCommodity(Commodity commodity) throws SQLException {
-    return false;
+    Objects.requireNonNull(commodity);
+    
+    Connection con = getConnection();
+    PreparedStatement stmt = con.prepareStatement(
+        new SQLBuilder().update(
+            dbPrefix + "commodity",
+            "label")
+        .where("id")
+        .toString());
+    stmt.setString(1, commodity.getLabel());
+    stmt.setBytes(2, SQLBuilder.uuidToBytes(commodity.getID()));
+
+    boolean isNew = false;
+    if(isNew = 0 >= stmt.executeUpdate()) {
+      close(null, stmt, null);
+      stmt = con.prepareStatement(
+          new SQLBuilder().insert(
+              dbPrefix + "commodity",
+              "label",
+              "id")
+          .toString());
+      stmt.setString(1, commodity.getLabel());
+      stmt.setBytes(2, SQLBuilder.uuidToBytes(commodity.getID()));
+    }
+
+    close(con, stmt, null);
+    return isNew;
   }
 
   /**
@@ -262,7 +393,19 @@ public class Database {
    * @throws SQLException if a database malfunction occurs
    */
   public boolean deleteCommodity(UUID id) throws SQLException {
-    return false;
+    if(null == id) return false;
+
+    Connection con = getConnection();
+    PreparedStatement stmt = con.prepareStatement(
+        new SQLBuilder().delete(
+            dbPrefix + "commodity")
+        .where("id")
+        .toString());
+    stmt.setBytes(1, SQLBuilder.uuidToBytes(id));
+    boolean success = 0 < stmt.executeUpdate();
+
+    close(con, stmt, null);
+    return success;
   }
 
   /**
@@ -274,7 +417,54 @@ public class Database {
    * @throws SQLException if a database error occurs
    */
   public Set<Recipe> getWorkbookRecipes(UUID workbook) throws SQLException {
-    return null;
+    if(null == workbook) return new HashSet<>();
+    
+    Map<UUID, Recipe> recipes = new HashMap<>();
+    Connection con = getConnection();
+    
+    PreparedStatement stmt = con.prepareStatement(
+        new SQLBuilder().select(
+            dbPrefix + "recipe",
+            "r.id",
+            "r.product",
+            "r.work_method",
+            "r.work_amount",
+            "i.commodity",
+            "i.amount")
+        .tableAlias("r")
+        .join(
+            Join.LEFT,
+            dbPrefix + "recipe_ingredients",
+            "i",
+            "r.id",
+            "i.recipe",
+            Comparison.EQUAL_TO)
+        .where("r.workbook")
+        .toString());
+    stmt.setBytes(1, SQLBuilder.uuidToBytes(workbook));
+    ResultSet res = stmt.executeQuery();
+
+    while(res.next()) {
+      UUID id = SQLBuilder.bytesToUUID(res.getBytes("r.id"));
+      Recipe recipe = null;
+      if(recipes.containsKey(id))
+        recipe = recipes.get(id);
+      else recipes.put(
+          id,
+          recipe = new Recipe(
+              id,
+              workbook,
+              SQLBuilder.bytesToUUID(
+                  res.getBytes("product")),
+              Work.values()[res.getInt("work_method")],
+              res.getFloat("work_amount")));
+
+      UUID commodity = SQLBuilder.bytesToUUID(res.getBytes("i.commodity"));
+      if(null != commodity) recipe.setIngredient(commodity, res.getInt("amount"));
+    }
+
+    close(con, stmt, res);
+    return Set.copyOf(recipes.values());
   }
 
   /**
@@ -285,8 +475,50 @@ public class Database {
    *         provided, or {@code null} if no such recipe exists
    * @throws SQLException if a database malfunction occurs
    */
-  public Recipe getRecipe(UUID id) {
-    return null;
+  public Recipe getRecipe(UUID id) throws SQLException {
+    if(null == id) return null;
+    
+    Connection con = getConnection();
+    PreparedStatement stmt = con.prepareStatement(
+        new SQLBuilder().select(
+            dbPrefix + "recipe",
+            "r.product",
+            "r.workbook",
+            "r.work_method",
+            "r.work_amount",
+            "i.commodity",
+            "i.amount")
+        .tableAlias("r")
+        .join(
+            Join.LEFT,
+            dbPrefix + "recipe_ingredients",
+            "i",
+            "r.id",
+            "i.recipe",
+            Comparison.EQUAL_TO)
+        .where("r.id")
+        .toString());
+    stmt.setBytes(1, SQLBuilder.uuidToBytes(id));
+    ResultSet res = stmt.executeQuery();
+
+    Recipe recipe = null;
+    while(res.next()) {
+      if(null == recipe)
+        recipe = new Recipe(
+            id,
+            SQLBuilder.bytesToUUID(
+                res.getBytes("workbook")),
+            SQLBuilder.bytesToUUID(
+                res.getBytes("product")),
+            Work.values()[res.getInt("work_method")],
+            res.getFloat("work_amount"));
+
+      UUID commodity = SQLBuilder.bytesToUUID(res.getBytes("i.commodity"));
+      if(null != commodity) recipe.setIngredient(commodity, res.getInt("amount"));
+    }
+
+    close(con, stmt, res);
+    return recipe;
   }
 
   /**
@@ -299,7 +531,100 @@ public class Database {
    * @throws SQLException if a database malfunction occurs
    */
   public boolean setRecipe(Recipe recipe) throws SQLException {
-    return false;
+    Objects.requireNonNull(recipe);
+    byte[] idBytes = SQLBuilder.uuidToBytes(recipe.getID());
+
+    Connection con = getConnection();
+    PreparedStatement stmt = con.prepareStatement(
+        new SQLBuilder().update(
+            dbPrefix + "recipe",
+            "product",
+            "workbook",
+            "work_method",
+            "work_amount")
+        .where("id")
+        .toString());
+    stmt.setBytes(1, SQLBuilder.uuidToBytes(recipe.getProduct()));
+    stmt.setBytes(2, SQLBuilder.uuidToBytes(recipe.getWorkbook()));
+    stmt.setInt(3, recipe.getWorkMethod().ordinal());
+    stmt.setFloat(4, recipe.getWorkAmount());
+    stmt.setBytes(5, idBytes);
+
+    Map<UUID, Integer> ingredients = null;
+
+    boolean isNew = false;
+    if(isNew = 0 >= stmt.executeUpdate()) {
+      close(null, stmt, null);
+      stmt = con.prepareStatement(
+          new SQLBuilder().insert(
+              dbPrefix + "recipe",
+              "product",
+              "workbook",
+              "work_method",
+              "work_amount",
+              "id")
+          .toString());
+      stmt.setBytes(1, SQLBuilder.uuidToBytes(recipe.getProduct()));
+      stmt.setBytes(2, SQLBuilder.uuidToBytes(recipe.getWorkbook()));
+      stmt.setInt(3, recipe.getWorkMethod().ordinal());
+      stmt.setFloat(4, recipe.getWorkAmount());
+      stmt.setBytes(5, idBytes);
+      stmt.executeUpdate();
+
+      ingredients = recipe.getIngredients();
+    } else {
+      var oldIngredients = getRecipe(recipe.getID()).getIngredients();
+      Set<UUID> staleIngredients = new HashSet<>();
+      ingredients = new HashMap<>();
+      for(var ingredient : oldIngredients.entrySet()) {
+        if(!recipe.getIngredients().containsKey(ingredient.getKey()))
+          ingredients.put(ingredient.getKey(), ingredient.getValue());
+        else if(recipe.getIngredients().get(ingredient.getKey()) != ingredient.getValue()) {
+          staleIngredients.add(ingredient.getKey());
+          ingredients.put(ingredient.getKey(), ingredient.getValue());
+        }
+      }
+
+      if(!staleIngredients.isEmpty()) {
+        SQLBuilder rmStaleIngredientStmt = new SQLBuilder()
+            .delete(dbPrefix + "recipe_ingredients")
+            .where("recipe");
+
+        for(int i = 0; i < staleIngredients.size(); i++) {
+          rmStaleIngredientStmt.where("recipe_ingredients");
+          if(0 == i) rmStaleIngredientStmt.or();
+        }
+
+        close(null, stmt, null);
+        stmt = con.prepareStatement(rmStaleIngredientStmt.toString());
+        stmt.setBytes(1, idBytes);
+        int idx = 1;
+        for(var stale : staleIngredients)
+          stmt.setBytes(++idx, SQLBuilder.uuidToBytes(stale));
+
+        stmt.executeUpdate();
+      }
+    }
+
+    if(!ingredients.isEmpty()) {
+      String addIngredientStmt = new SQLBuilder()
+        .insert(
+            dbPrefix + "recipe_ingredients",
+            "recipe",
+            "commodity",
+            "amount")
+        .toString();
+      for(var ingredient : ingredients.entrySet()) {
+        close(null, stmt, null);
+        stmt = con.prepareStatement(addIngredientStmt);
+        stmt.setBytes(1, idBytes);
+        stmt.setBytes(2, SQLBuilder.uuidToBytes(ingredient.getKey()));
+        stmt.setInt(3, ingredient.getValue());
+      }
+    }
+
+    close(con, stmt, null);
+    return isNew;
   }
 
   /**
@@ -311,7 +636,19 @@ public class Database {
    * @throws SQLException if a database malfunction occurs
    */
   public boolean deleteRecipe(UUID id) throws SQLException {
-    return false;
+    if(null == id) return false;
+    
+    Connection con = getConnection();
+    PreparedStatement stmt = con.prepareStatement(
+        new SQLBuilder().delete(
+            dbPrefix + "recipe")
+        .where("id")
+        .toString());
+    stmt.setBytes(1, SQLBuilder.uuidToBytes(id));
+    boolean success = 0 < stmt.executeUpdate();
+
+    close(con, stmt, null);
+    return success;
   }
 
   /**
@@ -320,7 +657,7 @@ public class Database {
    * @return a {@link Set} of {@link Workbook} objects
    * @throws SQLException if a database malfunction occurs
    */
-  public Set<Workbook> getWorkbooks() {
+  public Set<Workbook> getWorkbooks() throws SQLException {
     return null;
   }
 
@@ -332,7 +669,7 @@ public class Database {
    *         one provided, or {@code null} if no such workbook exists
    * @throws SQLException if a database malfunction occurs
    */
-  public Workbook getWorkbook(UUID id) {
+  public Workbook getWorkbook(UUID id) throws SQLException {
     return null;
   }
 

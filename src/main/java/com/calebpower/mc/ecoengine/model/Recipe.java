@@ -61,7 +61,7 @@ public class Recipe {
    * @param workAmount the amount of work that needs to be put into the
    *        transition
    */
-  public Recipe(UUID id, UUID workbook, String label, UUID product, Work workMethod, float workAmount) {
+  public Recipe(UUID id, UUID workbook, UUID product, Work workMethod, float workAmount) {
     this.id = id;
     this.workbook = workbook;
     this.product = product;
