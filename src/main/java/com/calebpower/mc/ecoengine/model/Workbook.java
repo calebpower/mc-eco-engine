@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2023 Caleb L. Power et. al.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.calebpower.mc.ecoengine.model;
 
 import java.sql.Timestamp;
@@ -39,17 +54,26 @@ public class Workbook {
   }
 
   /**
-   * Instantiates a child {@link Workbook} object from some parent workbook.
+   * Instantiates a child {@link Workbook} object, potentially as a copy of some
+   * parent workbook. One or both of the  arguments {@code parent} and
+   * {@code description} must be specified.
    *
    * @param id the new workbook's unique identifier
-   * @param parent the parent from which this workbook shall be created
+   * @param parent the parent from which this workbook shall be created, or
+   *        {@code null} if this workbook has no parent
+   * @param description the new workbook's description, or {@code null} if
+   *        the parent's description should be used
    */
-  public Workbook(UUID id, Workbook parent) {
+  public Workbook(UUID id, Workbook parent, String description) {
+    if(null == parent && null == description)
+      throw new IllegalArgumentException("parent and/or description must be specified");
     this.id = id;
-    this.parent = parent.parent;
-    this.description = parent.description;
-    this.children.addAll(parent.children);
-    this.supportedCommodities.addAll(parent.supportedCommodities);
+    if(null != parent) {
+      this.parent = parent.parent;
+      this.children.addAll(parent.children);
+      this.supportedCommodities.addAll(parent.supportedCommodities);
+    }
+    this.description = null == description ? parent.description : description;
   }
 
   /**

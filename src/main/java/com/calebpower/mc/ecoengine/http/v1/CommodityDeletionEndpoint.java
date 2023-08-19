@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2023 Axonibyte Innovations, LLC. All rights reserved.
+ * Copyright (c) 2023 Caleb L. Power et. al.
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   https://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,9 +29,9 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
-public class CommodityRemovalEndpoint extends JSONEndpoint {
+public class CommodityDeletionEndpoint extends JSONEndpoint {
 
-  public CommodityRemovalEndpoint() {
+  public CommodityDeletionEndpoint() {
     super("/commodities/:commodity", APIVersion.VERSION_1, HTTPMethod.POST);
   }
 
