@@ -5,10 +5,10 @@ CREATE TABLE IF NOT EXISTS ${database}.${prefix}pantry (
     DEFAULT CURRENT_TIMESTAMP
     NOT NULL,
   PRIMARY KEY (cookbook, commodity),
-  FOREIGN KEY (cookbook) REFERENCES ${prefix}cookbook
+  FOREIGN KEY (cookbook) REFERENCES ${prefix}cookbook (id)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
-  FOREIGN KEY (commodity) REFERENCES ${prefix}commodity
+  FOREIGN KEY (commodity) REFERENCES ${prefix}commodity (id)
     ON UPDATE CASCADE
     ON DELETE CASCADE
 )Engine=InnoDB;

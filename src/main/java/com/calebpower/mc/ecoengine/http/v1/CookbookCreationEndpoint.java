@@ -51,11 +51,16 @@ public class CookbookCreationEndpoint extends JSONEndpoint {
       JSONObject reqBody = new JSONObject(req.body());
       
       Cookbook parent = null;
-      try {
-        parent = Database.getInstance().getCookbook(
-            UUID.fromString(
-                reqBody.optString("parent")));
-      } catch(IllegalArgumentException e) { }
+      if(reqBody.has("parent")) {
+        try {
+          parent = Database.getInstance().getCookbook(
+              UUID.fromString(
+                  reqBody.getString("parent")));
+        } catch(IllegalArgumentException e) { }
+
+        if(null == parent)
+          throw new EndpointException(req, "Parent not found.", 404);
+      }
 
       String description = null;
       if(reqBody.has("description"))

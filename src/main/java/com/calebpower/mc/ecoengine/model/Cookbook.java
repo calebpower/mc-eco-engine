@@ -69,7 +69,7 @@ public class Cookbook {
       throw new IllegalArgumentException("parent and/or description must be specified");
     this.id = id;
     if(null != parent) {
-      this.parent = parent.parent;
+      this.parent = parent.id;
       this.children.addAll(parent.children);
       this.supportedCommodities.addAll(parent.supportedCommodities);
     }
