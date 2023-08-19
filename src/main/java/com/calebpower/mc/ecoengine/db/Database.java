@@ -39,7 +39,7 @@ import com.calebpower.mc.ecoengine.db.SQLBuilder.Comparison;
 import com.calebpower.mc.ecoengine.db.SQLBuilder.Join;
 import com.calebpower.mc.ecoengine.model.Commodity;
 import com.calebpower.mc.ecoengine.model.Recipe;
-import com.calebpower.mc.ecoengine.model.Workbook;
+import com.calebpower.mc.ecoengine.model.Cookbook;
 import com.calebpower.mc.ecoengine.model.Recipe.Work;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -409,14 +409,14 @@ public class Database {
 
   /**
    * Retrieves the set of all known recipes associated with a particular
-   * workbook.
+   * cookbook.
    *
-   * @param workbook the workbook's unique {@link UUID}
+   * @param cookbook the cookbook's unique {@link UUID}
    * @return a {@link Set} of {@link Recipe} objects
    * @throws SQLException if a database error occurs
    */
-  public Set<Recipe> getWorkbookRecipes(UUID workbook) throws SQLException {
-    if(null == workbook) return new HashSet<>();
+  public Set<Recipe> getCookbookRecipes(UUID cookbook) throws SQLException {
+    if(null == cookbook) return new HashSet<>();
     
     Map<UUID, Recipe> recipes = new HashMap<>();
     Connection con = getConnection();
@@ -434,14 +434,14 @@ public class Database {
         .tableAlias("r")
         .join(
             Join.LEFT,
-            dbPrefix + "recipe_ingredients",
+            dbPrefix + "ingredient",
             "i",
             "r.id",
             "i.recipe",
             Comparison.EQUAL_TO)
-        .where("r.workbook")
+        .where("r.cookbook")
         .toString());
-    stmt.setBytes(1, SQLBuilder.uuidToBytes(workbook));
+    stmt.setBytes(1, SQLBuilder.uuidToBytes(cookbook));
     ResultSet res = stmt.executeQuery();
 
     while(res.next()) {
@@ -453,7 +453,7 @@ public class Database {
           id,
           recipe = new Recipe(
               id,
-              workbook,
+              cookbook,
               SQLBuilder.bytesToUUID(
                   res.getBytes("product")),
               res.getInt("product_yield"),
@@ -483,7 +483,7 @@ public class Database {
     PreparedStatement stmt = con.prepareStatement(
         new SQLBuilder().select(
             dbPrefix + "recipe",
-            "r.workbook",
+            "r.cookbook",
             "r.product",
             "r.product_yield",
             "r.work_method",
@@ -493,7 +493,7 @@ public class Database {
         .tableAlias("r")
         .join(
             Join.LEFT,
-            dbPrefix + "recipe_ingredients",
+            dbPrefix + "ingredient",
             "i",
             "r.id",
             "i.recipe",
@@ -509,7 +509,7 @@ public class Database {
         recipe = new Recipe(
             id,
             SQLBuilder.bytesToUUID(
-                res.getBytes("workbook")),
+                res.getBytes("cookbook")),
             SQLBuilder.bytesToUUID(
                 res.getBytes("product")),
             res.getInt("product_yield"),
@@ -541,14 +541,14 @@ public class Database {
     PreparedStatement stmt = con.prepareStatement(
         new SQLBuilder().update(
             dbPrefix + "recipe",
-            "workbook",
+            "cookbook",
             "product",
             "product_yield",
             "work_method",
             "work_cost")
         .where("id")
         .toString());
-    stmt.setBytes(1, SQLBuilder.uuidToBytes(recipe.getWorkbook()));
+    stmt.setBytes(1, SQLBuilder.uuidToBytes(recipe.getCookbook()));
     stmt.setBytes(2, SQLBuilder.uuidToBytes(recipe.getProduct()));
     stmt.setInt(3, recipe.getYield());
     stmt.setInt(4, recipe.getWork().ordinal());
@@ -563,14 +563,14 @@ public class Database {
       stmt = con.prepareStatement(
           new SQLBuilder().insert(
               dbPrefix + "recipe",
-              "workbook",
+              "cookbook",
               "product",
               "product_yield",
               "work_method",
               "work_amount",
               "id")
           .toString());
-      stmt.setBytes(1, SQLBuilder.uuidToBytes(recipe.getWorkbook()));
+      stmt.setBytes(1, SQLBuilder.uuidToBytes(recipe.getCookbook()));
       stmt.setBytes(2, SQLBuilder.uuidToBytes(recipe.getProduct()));
       stmt.setInt(3, recipe.getYield());
       stmt.setInt(4, recipe.getWork().ordinal());
@@ -598,11 +598,11 @@ public class Database {
 
       if(!staleIngredients.isEmpty()) {
         SQLBuilder rmStaleIngredientStmt = new SQLBuilder()
-            .delete(dbPrefix + "recipe_ingredients")
+            .delete(dbPrefix + "ingredient")
             .where("recipe");
 
         for(int i = 0; i < staleIngredients.size(); i++) {
-          rmStaleIngredientStmt.where("recipe_ingredients");
+          rmStaleIngredientStmt.where("ingredient");
           if(0 == i) rmStaleIngredientStmt.or();
         }
 
@@ -620,7 +620,7 @@ public class Database {
     if(!ingredients.isEmpty()) {
       String addIngredientStmt = new SQLBuilder()
         .insert(
-            dbPrefix + "recipe_ingredients",
+            dbPrefix + "ingredient",
             "recipe",
             "commodity",
             "amount")
@@ -664,18 +664,18 @@ public class Database {
   }
 
   /**
-   * Retrieves the set of all known workbooks.
+   * Retrieves the set of all known cookbooks.
    *
-   * @return a {@link Set} of {@link Workbook} objects
+   * @return a {@link Set} of {@link Cookbook} objects
    * @throws SQLException if a database malfunction occurs
    */
-  public Set<Workbook> getWorkbooks() throws SQLException {
-    Map<UUID, Workbook> workbooks = new HashMap<>();
+  public Set<Cookbook> getCookbooks() throws SQLException {
+    Map<UUID, Cookbook> cookbooks = new HashMap<>();
     Connection con = getConnection();
     
     PreparedStatement stmt = con.prepareStatement(
         new SQLBuilder().select(
-            dbPrefix + "workbook",
+            dbPrefix + "cookbook",
             "w.id",
             "w.parent",
             "w.description",
@@ -685,23 +685,23 @@ public class Database {
         .tableAlias("w")
         .join(
             Join.LEFT,
-            dbPrefix + "workbook_commodities",
+            dbPrefix + "pantry",
             "c",
             "w.id",
-            "c.workbook",
+            "c.cookbook",
             Comparison.EQUAL_TO)
         .toString());
     ResultSet res = stmt.executeQuery();
 
     while(res.next()) {
       UUID id = SQLBuilder.bytesToUUID(res.getBytes("w.id"));
-      Workbook workbook = null;
-      if(workbooks.containsKey(id))
-        workbook = workbooks.get(id);
+      Cookbook cookbook = null;
+      if(cookbooks.containsKey(id))
+        cookbook = cookbooks.get(id);
       else
-        workbooks.put(
+        cookbooks.put(
             id,
-            workbook = new Workbook(
+            cookbook = new Cookbook(
                 id,
                 SQLBuilder.bytesToUUID(
                     res.getBytes("w.parent")),
@@ -710,14 +710,14 @@ public class Database {
                 res.getTimestamp("w.last_update")));
 
       UUID commodity = SQLBuilder.bytesToUUID(res.getBytes("c.commodity"));
-      if(null != commodity) workbook.addSupportedCommodity(commodity);
+      if(null != commodity) cookbook.addSupportedCommodity(commodity);
     }
 
-    if(!workbooks.isEmpty()) {
+    if(!cookbooks.isEmpty()) {
       SQLBuilder getChildrenStmt = new SQLBuilder()
-        .select(dbPrefix + "workbook", "id", "parent");
+        .select(dbPrefix + "cookbook", "id", "parent");
 
-      for(int i = 0; i < workbooks.size(); i++) {
+      for(int i = 0; i < cookbooks.size(); i++) {
         getChildrenStmt.where("parent");
         if(0 == i) getChildrenStmt.or();
       }
@@ -726,13 +726,13 @@ public class Database {
       stmt = con.prepareStatement(getChildrenStmt.toString());
 
       int idx = 0;
-      for(var workbook : workbooks.entrySet())
-        stmt.setBytes(++idx, SQLBuilder.uuidToBytes(workbook.getKey()));
+      for(var cookbook : cookbooks.entrySet())
+        stmt.setBytes(++idx, SQLBuilder.uuidToBytes(cookbook.getKey()));
 
       res = stmt.executeQuery();
 
       while(res.next())
-        workbooks.get(
+        cookbooks.get(
             SQLBuilder.bytesToUUID(
                 res.getBytes("parent")))
           .addChild(
@@ -741,24 +741,24 @@ public class Database {
     }
 
     close(con, stmt, res);
-    return Set.copyOf(workbooks.values());
+    return Set.copyOf(cookbooks.values());
   }
 
   /**
-   * Retrieves a particular workbook.
+   * Retrieves a particular cookbook.
    *
-   * @param id the workbook's unique {@link UUID}
-   * @return a {@link Workbook} object, if one exists with an ID matching the
-   *         one provided, or {@code null} if no such workbook exists
+   * @param id the cookbook's unique {@link UUID}
+   * @return a {@link Cookbook} object, if one exists with an ID matching the
+   *         one provided, or {@code null} if no such cookbook exists
    * @throws SQLException if a database malfunction occurs
    */
-  public Workbook getWorkbook(UUID id) throws SQLException {
+  public Cookbook getCookbook(UUID id) throws SQLException {
     if(null == id) return null;
 
     Connection con = getConnection();
     PreparedStatement stmt = con.prepareStatement(
         new SQLBuilder().select(
-            dbPrefix + "workbook",
+            dbPrefix + "cookbook",
             "w.parent",
             "w.description",
             "w.creation_time",
@@ -767,20 +767,20 @@ public class Database {
         .tableAlias("w")
         .join(
             Join.LEFT,
-            dbPrefix + "workbook_commodities",
+            dbPrefix + "pantry",
             "c",
             "w.id",
-            "c.workbook",
+            "c.cookbook",
             Comparison.EQUAL_TO)
         .where("w.id")
         .toString());
     stmt.setBytes(1, SQLBuilder.uuidToBytes(id));
     ResultSet res = stmt.executeQuery();
 
-    Workbook workbook = null;
+    Cookbook cookbook = null;
     while(res.next()) {
-      if(null == workbook)
-        workbook = new Workbook(
+      if(null == cookbook)
+        cookbook = new Cookbook(
             id,
             SQLBuilder.bytesToUUID(
                 res.getBytes("w.parent")),
@@ -789,13 +789,13 @@ public class Database {
             res.getTimestamp("w.last_update"));
 
       UUID commodity = SQLBuilder.bytesToUUID(res.getBytes("c.commodity"));
-      if(null != commodity) workbook.addSupportedCommodity(commodity);
+      if(null != commodity) cookbook.addSupportedCommodity(commodity);
     }
 
-    if(null != workbook) {
+    if(null != cookbook) {
       stmt = con.prepareStatement(
           new SQLBuilder().select(
-              dbPrefix + "workbook",
+              dbPrefix + "cookbook",
               "id")
           .where("parent")
           .toString());
@@ -803,38 +803,38 @@ public class Database {
       res = stmt.executeQuery();
 
       while(res.next())
-        workbook.addChild(
+        cookbook.addChild(
             SQLBuilder.bytesToUUID(
                 res.getBytes("id")));
     }
 
     close(con, stmt, res);
-    return workbook;
+    return cookbook;
   }
 
   /**
    * Adds a commodity to the database if it does not already exist. Otherwise,
    * updates the existing record.
    *
-   * @param workbook the {@link Workbook} object to store in the database
+   * @param cookbook the {@link Cookbook} object to store in the database
    * @return {@code true} if a new record was added;
    *         {@code false} if an existing record was updated
    * @throws SQLException if a database malfunction occurs
    */
-  public boolean setWorkbook(Workbook workbook) throws SQLException {
-    Objects.requireNonNull(workbook);
-    byte[] idBytes = SQLBuilder.uuidToBytes(workbook.getID());
+  public boolean setCookbook(Cookbook cookbook) throws SQLException {
+    Objects.requireNonNull(cookbook);
+    byte[] idBytes = SQLBuilder.uuidToBytes(cookbook.getID());
 
     Connection con = getConnection();
     PreparedStatement stmt = con.prepareStatement(
         new SQLBuilder().select(
-            dbPrefix + "workbook",
+            dbPrefix + "cookbook",
             "parent",
             "description")
         .where("id")
         .toString());
-    stmt.setBytes(1, SQLBuilder.uuidToBytes(workbook.getParent()));
-    stmt.setString(2, workbook.getDescription());
+    stmt.setBytes(1, SQLBuilder.uuidToBytes(cookbook.getParent()));
+    stmt.setString(2, cookbook.getDescription());
     stmt.setBytes(3, idBytes);
 
     Set<UUID> commodities = null;
@@ -844,35 +844,35 @@ public class Database {
       close(null, stmt, null);
       stmt = con.prepareStatement(
           new SQLBuilder().insert(
-              dbPrefix + "workbook",
+              dbPrefix + "cookbook",
               "parent",
               "description",
               "id")
           .toString());
-      stmt.setBytes(1, SQLBuilder.uuidToBytes(workbook.getParent()));
-      stmt.setString(2, workbook.getDescription());
+      stmt.setBytes(1, SQLBuilder.uuidToBytes(cookbook.getParent()));
+      stmt.setString(2, cookbook.getDescription());
       stmt.setBytes(3, idBytes);
       stmt.executeUpdate();
 
-      commodities = workbook.getSupportedCommodities();
+      commodities = cookbook.getSupportedCommodities();
     } else {
-      var oldCommodities = getWorkbook(workbook.getID()).getSupportedCommodities();
+      var oldCommodities = getCookbook(cookbook.getID()).getSupportedCommodities();
       Set<UUID> staleCommodities = new HashSet<>();
       commodities = new HashSet<>();
 
-      for(var commodity : workbook.getSupportedCommodities()) {
+      for(var commodity : cookbook.getSupportedCommodities()) {
         if(!oldCommodities.contains(commodity))
           commodities.add(commodity);
       }
 
       for(var commodity : oldCommodities)
-        if(!workbook.getSupportedCommodities().contains(commodity))
+        if(!cookbook.getSupportedCommodities().contains(commodity))
           staleCommodities.add(commodity);
 
       if(!staleCommodities.isEmpty()) {
         SQLBuilder rmStaleCommodityStmt = new SQLBuilder()
-          .delete(dbPrefix + "workbook_commodities")
-          .where("workbook");
+          .delete(dbPrefix + "pantry")
+          .where("cookbook");
 
         for(int i = 0; i < staleCommodities.size(); i++) {
           rmStaleCommodityStmt.where("commodity");
@@ -893,8 +893,8 @@ public class Database {
     if(!commodities.isEmpty()) {
       String addCommodityStmt = new SQLBuilder()
         .insert(
-            dbPrefix + "workbook_commodities",
-            "workbook",
+            dbPrefix + "pantry",
+            "cookbook",
             "commodity")
         .toString();
       for(var commodity : commodities) {
@@ -911,21 +911,21 @@ public class Database {
   }
 
   /**
-   * Removes a workbook from the database.
+   * Removes a cookbook from the database.
    *
-   * @param id the workbook's unique {@link UUID}
-   * @return {@code true} iff the workbook was in the database and subsequently
+   * @param id the cookbook's unique {@link UUID}
+   * @return {@code true} iff the cookbook was in the database and subsequently
    *         removed from the database without issue
    * @throws SQLException if a database malfunction occurs
    */
-  public boolean deleteWorkbook(UUID id) throws SQLException {
+  public boolean deleteCookbook(UUID id) throws SQLException {
     if(null == id) return false;
     byte[] idBytes = SQLBuilder.uuidToBytes(id);
 
     Connection con = getConnection();
     PreparedStatement stmt = con.prepareStatement(
         new SQLBuilder().select(
-            dbPrefix + "workbook",
+            dbPrefix + "cookbook",
             "parent")
         .where("id")
         .limit(1)
@@ -939,7 +939,7 @@ public class Database {
       
       stmt = con.prepareStatement(
           new SQLBuilder().update(
-              dbPrefix + "workbook",
+              dbPrefix + "cookbook",
               "parent")
           .where("parent")
           .toString());
@@ -952,7 +952,7 @@ public class Database {
 
     stmt = con.prepareStatement(
         new SQLBuilder().delete(
-            dbPrefix + "workbook")
+            dbPrefix + "cookbook")
         .where("id")
         .toString());
     stmt.setBytes(1, idBytes);

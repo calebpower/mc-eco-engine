@@ -31,7 +31,7 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Facilitates the deletion of recipes from a workbook.
+ * Facilitates the deletion of recipes from a cookbook.
  *
  * @author Caleb L. Power <cpower@axonibyte.com>
  */
@@ -41,24 +41,24 @@ public class RecipeDeletionEndpoint extends JSONEndpoint {
    * Instantiates the endpoint.
    */
   public RecipeDeletionEndpoint() {
-    super("/workbooks/:workbook/recipes/:recipe", APIVersion.VERSION_1, HTTPMethod.DELETE);
+    super("/cookbooks/:cookbook/recipes/:recipe", APIVersion.VERSION_1, HTTPMethod.DELETE);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
     try {
-      UUID workbook = null;
+      UUID cookbook = null;
       Recipe recipe = null;
       
       try {
-        workbook = UUID.fromString(req.params("workbook"));
+        cookbook = UUID.fromString(req.params("cookbook"));
         recipe = Database.getInstance().getRecipe(
             UUID.fromString(
                 req.params("recipe")));
       } catch(IllegalArgumentException e) { }
 
       if(null == recipe
-          || null == workbook
-          || 0 != recipe.getWorkbook().compareTo(workbook)
+          || null == cookbook
+          || 0 != recipe.getCookbook().compareTo(cookbook)
           || !Database.getInstance().deleteRecipe(recipe.getID()))
         throw new EndpointException(req, "Recipe not found.", 404);
 

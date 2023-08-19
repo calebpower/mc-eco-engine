@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS ${database}.${prefix}workbook (
+CREATE TABLE IF NOT EXISTS ${database}.${prefix}cookbook (
   id BINARY(16) NOT NULL,
   parent BINARY(16),
   description VARCHAR(255) NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS ${database}.${prefix}workbook (
     ON UPDATE CURRENT_TIMESTAMP
     NOT NULL,
   PRIMARY KEY (id)
-  FOREIGN KEY (parent) REFERENCES ${prefix}workbook
+  FOREIGN KEY (parent) REFERENCES ${prefix}cookbook
     ON UPDATE CASCADE
     ON DELETE SET NULL
 )Engine=InnoDB;

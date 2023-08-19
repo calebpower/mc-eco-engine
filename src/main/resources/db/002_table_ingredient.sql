@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS ${database}.${prefix}recipe_ingredients (
+CREATE TABLE IF NOT EXISTS ${database}.${prefix}ingredient (
   recipe BINARY(16) NOT NULL,
   commodity BINARY(16) NOT NULL,
   amount TINYINT UNSIGNED NOT NULL,

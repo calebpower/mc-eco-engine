@@ -30,28 +30,28 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Facilitates workbook deletion.
+ * Facilitates cookbook deletion.
  *
  * @author Caleb L. Power <cpower@axonibyte.com>
  */
-public class WorkbookDeletionEndpoint extends JSONEndpoint {
+public class CookbookDeletionEndpoint extends JSONEndpoint {
 
   /**
    * Instantiates the endpoint.
    */
-  public WorkbookDeletionEndpoint() {
-    super("/workbooks/:workbook", APIVersion.VERSION_1, HTTPMethod.DELETE);
+  public CookbookDeletionEndpoint() {
+    super("/cookbooks/:cookbook", APIVersion.VERSION_1, HTTPMethod.DELETE);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
     UUID id = null;
     try {
-      id = UUID.fromString(req.params("workbook"));
+      id = UUID.fromString(req.params("cookbook"));
     } catch(IllegalArgumentException e) { }
 
     try {
-      if(!Database.getInstance().deleteWorkbook(id))
-        throw new EndpointException(req, "Workbook not found.", 404);
+      if(!Database.getInstance().deleteCookbook(id))
+        throw new EndpointException(req, "Cookbook not found.", 404);
     } catch(SQLException e) {
       throw new EndpointException(req, "Database malfunction.", 503, e);
     }
@@ -59,7 +59,7 @@ public class WorkbookDeletionEndpoint extends JSONEndpoint {
     res.status(200);
     return new JSONObject()
       .put("status", "ok")
-      .put("info", "Deleted workbook.");
+      .put("info", "Deleted cookbook.");
   }
   
 }

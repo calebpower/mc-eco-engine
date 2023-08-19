@@ -43,14 +43,14 @@ public class RecipeRetrievalEndpoint extends JSONEndpoint {
    * Instantiates the endpoint.
    */
   public RecipeRetrievalEndpoint() {
-    super("/workbooks/:workbook/recipes/:recipe", APIVersion.VERSION_1, HTTPMethod.GET);
+    super("/cookbooks/:cookbook/recipes/:recipe", APIVersion.VERSION_1, HTTPMethod.GET);
   }
   
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
-    UUID workbook = null;
+    UUID cookbook = null;
     Recipe recipe = null;
     try {
-      workbook = UUID.fromString(req.params("workbook"));
+      cookbook = UUID.fromString(req.params("cookbook"));
       recipe = Database.getInstance().getRecipe(
           UUID.fromString(
               req.params("recipe")));
@@ -58,9 +58,9 @@ public class RecipeRetrievalEndpoint extends JSONEndpoint {
       throw new EndpointException(req, "Database malfunction.", 503, e);
     } catch(IllegalArgumentException e) { }
 
-    if(null == workbook
+    if(null == cookbook
         || null == recipe
-        || 0 != recipe.getWorkbook().compareTo(workbook))
+        || 0 != recipe.getCookbook().compareTo(cookbook))
       throw new EndpointException(req, "Recipe not found.", 404);
 
     res.status(200);
@@ -69,7 +69,7 @@ public class RecipeRetrievalEndpoint extends JSONEndpoint {
         .put("info", "Retrieved recipe.")
         .put("recipe", new JSONObject()
             .put("id", recipe.getID().toString())
-            .put("workbook", workbook.toString())
+            .put("cookbook", cookbook.toString())
             .put("product", recipe.getProduct().toString())
             .put("yield", recipe.getYield())
             .put("work", recipe.getWork().name())

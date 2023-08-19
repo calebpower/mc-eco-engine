@@ -31,23 +31,23 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Facilitates the listing of known workbooks.
+ * Facilitates the listing of known cookbooks.
  *
  * @author Caleb L. Power <cpower@axonibyte.com>
  */
-public class WorkbookListingEndpoint extends JSONEndpoint {
+public class CookbookListingEndpoint extends JSONEndpoint {
 
   /**
    * Instantiates the endpoint.
    */
-  public WorkbookListingEndpoint() {
-    super("/workbooks", APIVersion.VERSION_1, HTTPMethod.GET);
+  public CookbookListingEndpoint() {
+    super("/cookbooks", APIVersion.VERSION_1, HTTPMethod.GET);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
     try {
-      JSONArray workbookArr = Database.getInstance()
-          .getWorkbooks()
+      JSONArray cookbookArr = Database.getInstance()
+          .getCookbooks()
           .stream()
           .map(w -> new JSONObject()
               .put("id", w.getID().toString())
@@ -66,8 +66,8 @@ public class WorkbookListingEndpoint extends JSONEndpoint {
       res.status(200);
       return new JSONObject()
         .put("status", "ok")
-        .put("info", "Retrieved workbooks.")
-        .put("workbooks", workbookArr);
+        .put("info", "Retrieved cookbooks.")
+        .put("cookbooks", cookbookArr);
     } catch(SQLException e) {
       throw new EndpointException(req, "Database malfunction.", 503, e);
     }

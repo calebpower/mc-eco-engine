@@ -30,7 +30,7 @@ public class Recipe {
 
   private UUID id = null;
   private UUID product = null;
-  private UUID workbook = null;
+  private UUID cookbook = null;
   private Map<UUID, Integer> ingredients = new HashMap<>();
   private Work work = null;
   private float cost = 0f;
@@ -68,7 +68,7 @@ public class Recipe {
    * Instantiates a {@link Recipe} object.
    *
    * @param id the unique {@link UUID} associated with this recipe
-   * @param workbook the unique {@link UUID} associated with the workbook
+   * @param cookbook the unique {@link UUID} associated with the cookbook
    *        containing this particular recipe
    * @param product the unique {@link UUID} associated with the product of this
    *        recipe
@@ -77,9 +77,9 @@ public class Recipe {
    * @param workAmount the amount of work that needs to be put into the
    *        transition
    */
-  public Recipe(UUID id, UUID workbook, UUID product, int yield, Work work, float cost) {
+  public Recipe(UUID id, UUID cookbook, UUID product, int yield, Work work, float cost) {
     this.id = id;
-    this.workbook = workbook;
+    this.cookbook = cookbook;
     this.product = product;
     this.yield = yield;
     this.work = work;
@@ -111,12 +111,12 @@ public class Recipe {
   }
 
   /**
-   * Retrieves the parent workbook's unique identifier.
+   * Retrieves the parent cookbook's unique identifier.
    *
-   * @return the workbook's unique {@link UUID}
+   * @return the cookbook's unique {@link UUID}
    */
-  public UUID getWorkbook() {
-    return workbook;
+  public UUID getCookbook() {
+    return cookbook;
   }
   
   /**

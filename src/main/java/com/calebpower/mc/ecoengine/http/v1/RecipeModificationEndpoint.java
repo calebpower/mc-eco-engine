@@ -27,7 +27,7 @@ import com.calebpower.mc.ecoengine.http.EndpointException;
 import com.calebpower.mc.ecoengine.http.HTTPMethod;
 import com.calebpower.mc.ecoengine.http.JSONEndpoint;
 import com.calebpower.mc.ecoengine.model.Recipe;
-import com.calebpower.mc.ecoengine.model.Workbook;
+import com.calebpower.mc.ecoengine.model.Cookbook;
 import com.calebpower.mc.ecoengine.model.Recipe.Work;
 
 import org.json.JSONArray;
@@ -38,7 +38,7 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Facilitates the modification of a recipe in a workbook.
+ * Facilitates the modification of a recipe in a cookbook.
  *
  * @author Caleb L. Power <cpower@axonibyte.com>
  */
@@ -48,7 +48,7 @@ public class RecipeModificationEndpoint extends JSONEndpoint {
    * Instantiates the endpoint.
    */
   public RecipeModificationEndpoint() {
-    super("/workbooks/:workbook/recipes", APIVersion.VERSION_1, HTTPMethod.PATCH);
+    super("/cookbooks/:cookbook/recipes", APIVersion.VERSION_1, HTTPMethod.PATCH);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
@@ -56,14 +56,14 @@ public class RecipeModificationEndpoint extends JSONEndpoint {
       JSONObject reqBody = new JSONObject(req.body());
 
       Recipe recipe = null;
-      Workbook workbook = null;
+      Cookbook cookbook = null;
       try {
-        workbook = Database.getInstance().getWorkbook(
+        cookbook = Database.getInstance().getCookbook(
             UUID.fromString(
-                req.params("workbook")));
+                req.params("cookbook")));
       } catch(IllegalArgumentException e) { }
 
-      if(null != workbook) {
+      if(null != cookbook) {
         try {
           recipe = Database.getInstance().getRecipe(
               UUID.fromString(
@@ -81,7 +81,7 @@ public class RecipeModificationEndpoint extends JSONEndpoint {
         } catch(IllegalArgumentException e) { }
 
         if(null == product
-            || !workbook.getSupportedCommodities().contains(product))
+            || !cookbook.getSupportedCommodities().contains(product))
           throw new EndpointException(req, "Unsupported product.", 404);
 
         recipe.setProduct(product);
@@ -131,7 +131,7 @@ public class RecipeModificationEndpoint extends JSONEndpoint {
           } catch(IllegalArgumentException e) { }
 
           if(null == iID
-              || !workbook.getSupportedCommodities().contains(iID))
+              || !cookbook.getSupportedCommodities().contains(iID))
             throw new EndpointException(req, "Unsupported ingredient.", 404);
 
           int quantity = 0;
@@ -154,7 +154,7 @@ public class RecipeModificationEndpoint extends JSONEndpoint {
           .put("info", "Modified recipe.")
           .put("recipe", new JSONObject()
               .put("id", recipe.getID().toString())
-              .put("workbook", workbook.getID().toString())
+              .put("cookbook", cookbook.getID().toString())
               .put("product", recipe.getProduct().toString())
               .put("yield", recipe.getYield())
               .put("work", recipe.getWork().name())

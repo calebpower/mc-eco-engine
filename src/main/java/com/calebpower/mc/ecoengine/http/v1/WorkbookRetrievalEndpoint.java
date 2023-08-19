@@ -25,7 +25,7 @@ import com.calebpower.mc.ecoengine.http.APIVersion;
 import com.calebpower.mc.ecoengine.http.EndpointException;
 import com.calebpower.mc.ecoengine.http.HTTPMethod;
 import com.calebpower.mc.ecoengine.http.JSONEndpoint;
-import com.calebpower.mc.ecoengine.model.Workbook;
+import com.calebpower.mc.ecoengine.model.Cookbook;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -34,31 +34,31 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Facilitates workbook retrieval.
+ * Facilitates cookbook retrieval.
  *
  * @author Caleb L. Power <cpower@axonibyte.com>
  */
-public class WorkbookRetrievalEndpoint extends JSONEndpoint {
+public class CookbookRetrievalEndpoint extends JSONEndpoint {
 
   /**
    * Instantiates the endpoint.
    */
-  public WorkbookRetrievalEndpoint() {
-    super("/workbooks/:workbook", APIVersion.VERSION_1, HTTPMethod.GET);
+  public CookbookRetrievalEndpoint() {
+    super("/cookbooks/:cookbook", APIVersion.VERSION_1, HTTPMethod.GET);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
-    Workbook workbook = null;
+    Cookbook cookbook = null;
     try {
-      workbook = Database.getInstance().getWorkbook(
+      cookbook = Database.getInstance().getCookbook(
           UUID.fromString(
-              req.params("workbook")));
+              req.params("cookbook")));
     } catch(SQLException e) {
       throw new EndpointException(req, "Database malfunction.", 503, e);
     } catch(IllegalArgumentException e) { }
 
-    if(null == workbook)
-      throw new EndpointException(req, "Workbook not found.", 404);
+    if(null == cookbook)
+      throw new EndpointException(req, "Cookbook not found.", 404);
 
     final Collector<String, JSONArray, JSONArray> toJSONArr = Collector.of(
         JSONArray::new,
@@ -69,25 +69,25 @@ public class WorkbookRetrievalEndpoint extends JSONEndpoint {
     res.status(200);
     return new JSONObject()
         .put("status", "ok")
-        .put("info", "Retrieved workbook.")
-        .put("workbook", new JSONObject()
-            .put("id", workbook.getID().toString())
-            .put("description", workbook.getDescription())
+        .put("info", "Retrieved cookbook.")
+        .put("cookbook", new JSONObject()
+            .put("id", cookbook.getID().toString())
+            .put("description", cookbook.getDescription())
             .put(
                 "parent",
-                null == workbook.getParent()
+                null == cookbook.getParent()
                     ? JSONObject.NULL
-                    : workbook.getParent().toString())
-            .put("children", workbook.getChildren()
+                    : cookbook.getParent().toString())
+            .put("children", cookbook.getChildren()
                 .stream()
                 .map(c -> c.toString())
                 .collect(toJSONArr))
-            .put("commodities", workbook.getSupportedCommodities()
+            .put("commodities", cookbook.getSupportedCommodities()
                 .stream()
                 .map(c -> c.toString())
                 .collect(toJSONArr))
-            .put("timeCreated", sdf.format(workbook.getTimeCreated()))
-            .put("timeModified", sdf.format(workbook.getTimeModified())));
+            .put("timeCreated", sdf.format(cookbook.getTimeCreated()))
+            .put("timeModified", sdf.format(cookbook.getTimeModified())));
   }
   
 }

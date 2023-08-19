@@ -34,7 +34,7 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Facilitates the listing of recipes in a workbook.
+ * Facilitates the listing of recipes in a cookbook.
  *
  * @author Caleb L. Power <cpower@axonibyte.com>
  */
@@ -44,28 +44,28 @@ public class RecipeListingEndpoint extends JSONEndpoint {
    * Instantiates the endpoint.
    */
   public RecipeListingEndpoint() {
-    super("/workbooks/:workbook/recipes", APIVersion.VERSION_1, HTTPMethod.GET);
+    super("/cookbooks/:cookbook/recipes", APIVersion.VERSION_1, HTTPMethod.GET);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
     try {
       Set<Recipe> recipes = null;
-      UUID workbook = null;
+      UUID cookbook = null;
 
       try {
-        recipes = Database.getInstance().getWorkbookRecipes(
-            workbook = UUID.fromString(
-                req.params("workbook")));
+        recipes = Database.getInstance().getCookbookRecipes(
+            cookbook = UUID.fromString(
+                req.params("cookbook")));
       } catch(IllegalArgumentException e) { }
 
       if(null == recipes)
-        throw new EndpointException(req, "Workbook not found.", 404);
+        throw new EndpointException(req, "Cookbook not found.", 404);
 
       res.status(200);
       return new JSONObject()
         .put("status", "ok")
         .put("info", "Retrieved recipes.")
-        .put("workbook", workbook.toString())
+        .put("cookbook", cookbook.toString())
         .put("recipes", recipes
              .stream()
              .map(r -> r.getID().toString())

@@ -24,7 +24,7 @@ import com.calebpower.mc.ecoengine.http.APIVersion;
 import com.calebpower.mc.ecoengine.http.EndpointException;
 import com.calebpower.mc.ecoengine.http.HTTPMethod;
 import com.calebpower.mc.ecoengine.http.JSONEndpoint;
-import com.calebpower.mc.ecoengine.model.Workbook;
+import com.calebpower.mc.ecoengine.model.Cookbook;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,55 +33,55 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Facilitates workbook modification.
+ * Facilitates cookbook modification.
  *
  * @author Caleb L. Power <cpower@axonibyte.com>
  */
-public class WorkbookModificationEndpoint extends JSONEndpoint {
+public class CookbookModificationEndpoint extends JSONEndpoint {
 
   /**
    * Instantiates the endpoint.
    */
-  public WorkbookModificationEndpoint() {
-    super("/workbooks/:workbook", APIVersion.VERSION_1, HTTPMethod.PATCH);
+  public CookbookModificationEndpoint() {
+    super("/cookbooks/:cookbook", APIVersion.VERSION_1, HTTPMethod.PATCH);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
     try {
       JSONObject reqBody = new JSONObject(req.body());
 
-      Workbook workbook = null;
+      Cookbook cookbook = null;
       try {
-        workbook = Database.getInstance().getWorkbook(
+        cookbook = Database.getInstance().getCookbook(
             UUID.fromString(
-                req.params("workbook")));
+                req.params("cookbook")));
       } catch(IllegalArgumentException e) { }
 
-      if(null == workbook)
-        throw new EndpointException(req, "Workbook not found.", 404);
+      if(null == cookbook)
+        throw new EndpointException(req, "Cookbook not found.", 404);
 
       if(reqBody.has("description"))
-        workbook.setDescription(
+        cookbook.setDescription(
             reqBody.getString("description"));
 
-      Database.getInstance().setWorkbook(workbook);
-      workbook = Database.getInstance().getWorkbook(workbook.getID());
+      Database.getInstance().setCookbook(cookbook);
+      cookbook = Database.getInstance().getCookbook(cookbook.getID());
 
       final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
       res.status(200);
       return new JSONObject()
           .put("status", "ok")
-          .put("info", "Modified workbook.")
-          .put("workbook", new JSONObject()
-              .put("id", workbook.getID().toString())
-              .put("description", workbook.getDescription())
+          .put("info", "Modified cookbook.")
+          .put("cookbook", new JSONObject()
+              .put("id", cookbook.getID().toString())
+              .put("description", cookbook.getDescription())
               .put(
                   "parent",
-                  null == workbook.getParent()
+                  null == cookbook.getParent()
                       ? JSONObject.NULL
-                      : workbook.getParent().toString())
-              .put("timeCreated", sdf.format(workbook.getTimeCreated()))
-              .put("timeModified", sdf.format(workbook.getTimeModified())));
+                      : cookbook.getParent().toString())
+              .put("timeCreated", sdf.format(cookbook.getTimeCreated()))
+              .put("timeModified", sdf.format(cookbook.getTimeModified())));
       
     } catch(JSONException e) {
       throw new EndpointException(req, "Syntax error.", 400, e);

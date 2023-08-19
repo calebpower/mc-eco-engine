@@ -22,11 +22,11 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Models a workbook--that is, a set of commodities and their respective recipes.
+ * Models a cookbook--that is, a set of commodities and their respective recipes.
  *
  * @author Caleb L. Power <cpower@axonibyte.com>
  */
-public class Workbook {
+public class Cookbook {
 
   private UUID id = null;
   private UUID parent = null;
@@ -37,15 +37,15 @@ public class Workbook {
   private Timestamp timeModified = null;
 
   /**
-   * Instantiates the {@link Workbook} object.
+   * Instantiates the {@link Cookkbook} object.
    *
-   * @param id the workbook's unique identifier
-   * @param parent the unique identifier of the workbook's parent
-   * @param description the human-readable description of the workbook
-   * @param timeCreated the time at which this workbook was first created
-   * @param timeModified the time at which this workbook was last modified
+   * @param id the cookbook's unique identifier
+   * @param parent the unique identifier of the cookbook's parent
+   * @param description the human-readable description of the cookbook
+   * @param timeCreated the time at which this cookbook was first created
+   * @param timeModified the time at which this cookbook was last modified
    */
-  public Workbook(UUID id, UUID parent, String description, Timestamp timeCreated, Timestamp timeModified) {
+  public Cookbook(UUID id, UUID parent, String description, Timestamp timeCreated, Timestamp timeModified) {
     this.id = id;
     this.parent = parent;
     this.description = description;
@@ -54,17 +54,17 @@ public class Workbook {
   }
 
   /**
-   * Instantiates a child {@link Workbook} object, potentially as a copy of some
-   * parent workbook. One or both of the  arguments {@code parent} and
+   * Instantiates a child {@link Cookbook} object, potentially as a copy of some
+   * parent cookbook. One or both of the  arguments {@code parent} and
    * {@code description} must be specified.
    *
-   * @param id the new workbook's unique identifier
-   * @param parent the parent from which this workbook shall be created, or
-   *        {@code null} if this workbook has no parent
-   * @param description the new workbook's description, or {@code null} if
+   * @param id the new cookbook's unique identifier
+   * @param parent the parent from which this cookbook shall be created, or
+   *        {@code null} if this cookbook has no parent
+   * @param description the new cookbook's description, or {@code null} if
    *        the parent's description should be used
    */
-  public Workbook(UUID id, Workbook parent, String description) {
+  public Cookbook(UUID id, Cookbook parent, String description) {
     if(null == parent && null == description)
       throw new IllegalArgumentException("parent and/or description must be specified");
     this.id = id;
@@ -77,16 +77,16 @@ public class Workbook {
   }
 
   /**
-   * Retrieves the unique identifier associated with this workbook.
+   * Retrieves the unique identifier associated with this cookbook.
    *
-   * @return the workbook's unique {@link UUID}
+   * @return the cookbook's unique {@link UUID}
    */
   public UUID getID() {
     return id;
   }
 
   /**
-   * Retrieves the unique identifier associated with the workbook's parent.
+   * Retrieves the unique identifier associated with the cookbook's parent.
    *
    * @return the parent's unique {@link UUID}
    */
@@ -95,7 +95,7 @@ public class Workbook {
   }
 
   /**
-   * Retrieves the set of unique identifiers associated with the workbook's
+   * Retrieves the set of unique identifiers associated with the cookbook's
    * children.
    *
    * @return an unmodifiable {@link Set} comprised of unique {@link UUID} objects
@@ -105,7 +105,7 @@ public class Workbook {
   }
 
   /**
-   * Adds a known child to the set of this workbook's children.
+   * Adds a known child to the set of this cookbook's children.
    *
    * @param child the unique {@link UUID} of the child in question
    */
@@ -114,7 +114,7 @@ public class Workbook {
   }
 
   /**
-   * Removes a child from the set of this workbook's children.
+   * Removes a child from the set of this cookbook's children.
    *
    * @param child the unique {@link UUID} of the child in question
    */
@@ -124,7 +124,7 @@ public class Workbook {
 
   /**
    * Retrieves the set of unique identifiers associated with commodities
-   * supported by this workbook.
+   * supported by this cookbook.
    *
    * @return an unmodifiable {@link Set} comprised of unique {@link UUID} objects
    */
@@ -133,7 +133,7 @@ public class Workbook {
   }
 
   /**
-   * Adds a commodity to the list of commodities supported by this workbook.
+   * Adds a commodity to the list of commodities supported by this cookbook.
    *
    * @param commodity the unique {@link UUID} of the commodity to support
    */
@@ -142,7 +142,7 @@ public class Workbook {
   }
 
   /**
-   * Removes a commodity from the list of commodities supported by this workbook.
+   * Removes a commodity from the list of commodities supported by this cookbook.
    *
    * @param the unique {@link UUID} of the commodity for which to remove support
    */
@@ -151,36 +151,36 @@ public class Workbook {
   }
   
   /**
-   * Retrieves this workbook's description.
+   * Retrieves this cookbook's description.
    *
-   * @return the workbook's human-readable description
+   * @return the cookbook's human-readable description
    */
   public String getDescription() {
     return description;
   }
 
   /**
-   * Sets the workbook's description.
+   * Sets the cookbook's description.
    *
-   * @param the workbook's new description
+   * @param the cookbook's new description
    */
   public void setDescription(String description) {
     this.description = description;
   }
 
   /**
-   * The time at which this workbook was first saved to the database.
+   * The time at which this cookbook was first saved to the database.
    *
-   * @return a {@link Timestamp} associated with the workbook's creation time
+   * @return a {@link Timestamp} associated with the cookbook's creation time
    */
   public Timestamp getTimeCreated() {
     return timeCreated;
   }
 
   /**
-   * The time at which this workbook was last modified.
+   * The time at which this cookbook was last modified.
    *
-   * @return a {@link Timestamp} associated with the workbook's last modification
+   * @return a {@link Timestamp} associated with the cookbook's last modification
    */
   public Timestamp getTimeModified() {
     return timeModified;

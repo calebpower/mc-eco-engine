@@ -24,7 +24,7 @@ import com.calebpower.mc.ecoengine.http.APIVersion;
 import com.calebpower.mc.ecoengine.http.EndpointException;
 import com.calebpower.mc.ecoengine.http.HTTPMethod;
 import com.calebpower.mc.ecoengine.http.JSONEndpoint;
-import com.calebpower.mc.ecoengine.model.Workbook;
+import com.calebpower.mc.ecoengine.model.Cookbook;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,26 +33,26 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Facilitates the creation of a workbook.
+ * Facilitates the creation of a cookbook.
  *
  * @author Caleb L. Power <cpower@axonibyte.com>
  */
-public class WorkbookCreationEndpoint extends JSONEndpoint {
+public class CookbookCreationEndpoint extends JSONEndpoint {
 
   /**
    * Instantiates the endpoint.
    */
-  public WorkbookCreationEndpoint() {
-    super("/workbooks", APIVersion.VERSION_1, HTTPMethod.POST);
+  public CookbookCreationEndpoint() {
+    super("/cookbooks", APIVersion.VERSION_1, HTTPMethod.POST);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
     try {
       JSONObject reqBody = new JSONObject(req.body());
       
-      Workbook parent = null;
+      Cookbook parent = null;
       try {
-        parent = Database.getInstance().getWorkbook(
+        parent = Database.getInstance().getCookbook(
             UUID.fromString(
                 reqBody.optString("parent")));
       } catch(IllegalArgumentException e) { }
@@ -62,26 +62,26 @@ public class WorkbookCreationEndpoint extends JSONEndpoint {
         description = reqBody.getString("description").strip();
 
       UUID id = null;
-      do id = UUID.randomUUID(); while(null != Database.getInstance().getWorkbook(id));
+      do id = UUID.randomUUID(); while(null != Database.getInstance().getCookbook(id));
 
-      Workbook workbook = new Workbook(id, parent, description);
-      Database.getInstance().setWorkbook(workbook);
-      workbook = Database.getInstance().getWorkbook(id);
+      Cookbook cookbook = new Cookbook(id, parent, description);
+      Database.getInstance().setCookbook(cookbook);
+      cookbook = Database.getInstance().getCookbook(id);
 
       final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
       res.status(201);
       return new JSONObject()
           .put("status", "ok")
-          .put("info", "Created workbook.")
-          .put("workbook", new JSONObject()
+          .put("info", "Created cookbook.")
+          .put("cookbook", new JSONObject()
               .put("id", id.toString())
-              .put("description", workbook.getDescription())
+              .put("description", cookbook.getDescription())
               .put(
                   "parent",
-                  null == workbook.getParent()
+                  null == cookbook.getParent()
                       ? JSONObject.NULL
-                      : workbook.getParent().toString())
-              .put("timeCreated", sdf.format(workbook.getTimeCreated())));
+                      : cookbook.getParent().toString())
+              .put("timeCreated", sdf.format(cookbook.getTimeCreated())));
       
     } catch(IllegalArgumentException | JSONException e) {
       throw new EndpointException(req, "Syntax error.", 400, e);

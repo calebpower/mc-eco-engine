@@ -25,7 +25,7 @@ import com.calebpower.mc.ecoengine.http.EndpointException;
 import com.calebpower.mc.ecoengine.http.HTTPMethod;
 import com.calebpower.mc.ecoengine.http.JSONEndpoint;
 import com.calebpower.mc.ecoengine.model.Recipe;
-import com.calebpower.mc.ecoengine.model.Workbook;
+import com.calebpower.mc.ecoengine.model.Cookbook;
 import com.calebpower.mc.ecoengine.model.Recipe.Work;
 
 import org.json.JSONArray;
@@ -36,7 +36,7 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Facilitates the creation of workbook recipes.
+ * Facilitates the creation of cookbook recipes.
  *
  * @author Caleb L. Power <cpower@axonibyte.com>
  */
@@ -46,22 +46,22 @@ public class RecipeCreationEndpoint extends JSONEndpoint {
    * Instantiates the endpoint.
    */
   public RecipeCreationEndpoint() {
-    super("/workbooks/:workbook/recipes", APIVersion.VERSION_1, HTTPMethod.POST);
+    super("/cookbooks/:cookbook/recipes", APIVersion.VERSION_1, HTTPMethod.POST);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
     try {
       JSONObject reqBody = new JSONObject(req.body());
 
-      Workbook workbook = null;
+      Cookbook cookbook = null;
       try {
-        workbook = Database.getInstance().getWorkbook(
+        cookbook = Database.getInstance().getCookbook(
             UUID.fromString(
-                req.params("workbook")));
+                req.params("cookbook")));
       } catch(IllegalArgumentException e) { }
 
-      if(null == workbook)
-        throw new EndpointException(req, "Workbook not found.", 404);
+      if(null == cookbook)
+        throw new EndpointException(req, "Cookbook not found.", 404);
 
       UUID product = null;
       try {
@@ -69,7 +69,7 @@ public class RecipeCreationEndpoint extends JSONEndpoint {
       } catch(IllegalArgumentException e) { }
 
       if(null == product
-          || !workbook.getSupportedCommodities().contains(product))
+          || !cookbook.getSupportedCommodities().contains(product))
         throw new EndpointException(req, "Unsupported product.", 404);
 
       int yield = 0;
@@ -100,7 +100,7 @@ public class RecipeCreationEndpoint extends JSONEndpoint {
 
       Recipe recipe = new Recipe(
           id,
-          workbook.getID(),
+          cookbook.getID(),
           product,
           yield,
           work,
@@ -114,7 +114,7 @@ public class RecipeCreationEndpoint extends JSONEndpoint {
         } catch(IllegalArgumentException e) { }
         
         if(null == iID
-            || !workbook.getSupportedCommodities().contains(iID))
+            || !cookbook.getSupportedCommodities().contains(iID))
           throw new EndpointException(req, "Unsupported ingredient.", 404);
 
         int quantity = 0;
@@ -134,7 +134,7 @@ public class RecipeCreationEndpoint extends JSONEndpoint {
           .put("info", "Created recipe.")
           .put("recipe", new JSONObject()
               .put("id", id.toString())
-              .put("workbook", workbook.getID().toString())
+              .put("cookbook", cookbook.getID().toString())
               .put("product", product.toString())
               .put("yield", yield)
               .put("work", work.name())
