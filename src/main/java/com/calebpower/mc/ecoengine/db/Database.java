@@ -711,7 +711,7 @@ public class Database {
                 res.getTimestamp("w.last_update")));
 
       UUID commodity = SQLBuilder.bytesToUUID(res.getBytes("c.commodity"));
-      if(null != commodity) cookbook.addSupportedCommodity(commodity);
+      if(null != commodity) cookbook.addToPantry(commodity);
     }
 
     if(!cookbooks.isEmpty()) {
@@ -791,7 +791,7 @@ public class Database {
             res.getTimestamp("w.last_update"));
 
       UUID commodity = SQLBuilder.bytesToUUID(res.getBytes("c.commodity"));
-      if(null != commodity) cookbook.addSupportedCommodity(commodity);
+      if(null != commodity) cookbook.addToPantry(commodity);
     }
 
     if(null != cookbook) {
@@ -856,19 +856,19 @@ public class Database {
       stmt.setBytes(3, idBytes);
       stmt.executeUpdate();
 
-      commodities = cookbook.getSupportedCommodities();
+      commodities = cookbook.getPantry();
     } else {
-      var oldCommodities = getCookbook(cookbook.getID()).getSupportedCommodities();
+      var oldCommodities = getCookbook(cookbook.getID()).getPantry();
       Set<UUID> staleCommodities = new HashSet<>();
       commodities = new HashSet<>();
 
-      for(var commodity : cookbook.getSupportedCommodities()) {
+      for(var commodity : cookbook.getPantry()) {
         if(!oldCommodities.contains(commodity))
           commodities.add(commodity);
       }
 
       for(var commodity : oldCommodities)
-        if(!cookbook.getSupportedCommodities().contains(commodity))
+        if(!cookbook.getPantry().contains(commodity))
           staleCommodities.add(commodity);
 
       if(!staleCommodities.isEmpty()) {

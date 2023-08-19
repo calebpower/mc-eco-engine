@@ -31,7 +31,7 @@ public class Cookbook {
   private UUID id = null;
   private UUID parent = null;
   private Set<UUID> children = new HashSet<>();
-  private Set<UUID> supportedCommodities = new HashSet<>();
+  private Set<UUID> pantry = new HashSet<>();
   private String description = null;
   private Timestamp timeCreated = null;
   private Timestamp timeModified = null;
@@ -71,7 +71,7 @@ public class Cookbook {
     if(null != parent) {
       this.parent = parent.id;
       this.children.addAll(parent.children);
-      this.supportedCommodities.addAll(parent.supportedCommodities);
+      this.pantry.addAll(parent.pantry);
     }
     this.description = null == description ? parent.description : description;
   }
@@ -128,8 +128,8 @@ public class Cookbook {
    *
    * @return an unmodifiable {@link Set} comprised of unique {@link UUID} objects
    */
-  public Set<UUID> getSupportedCommodities() {
-    return Collections.unmodifiableSet(supportedCommodities);
+  public Set<UUID> getPantry() {
+    return Collections.unmodifiableSet(pantry);
   }
 
   /**
@@ -137,8 +137,8 @@ public class Cookbook {
    *
    * @param commodity the unique {@link UUID} of the commodity to support
    */
-  public void addSupportedCommodity(UUID commodity) {
-    supportedCommodities.add(commodity);
+  public void addToPantry(UUID commodity) {
+    pantry.add(commodity);
   }
 
   /**
@@ -146,8 +146,8 @@ public class Cookbook {
    *
    * @param the unique {@link UUID} of the commodity for which to remove support
    */
-  public void removeSupportedCommodity(UUID commodity) {
-    supportedCommodities.remove(commodity);
+  public void removeFromPantry(UUID commodity) {
+    pantry.remove(commodity);
   }
   
   /**

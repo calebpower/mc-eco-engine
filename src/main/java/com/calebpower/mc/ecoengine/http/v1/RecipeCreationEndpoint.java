@@ -69,7 +69,7 @@ public class RecipeCreationEndpoint extends JSONEndpoint {
       } catch(IllegalArgumentException e) { }
 
       if(null == product
-          || !cookbook.getSupportedCommodities().contains(product))
+          || !cookbook.getPantry().contains(product))
         throw new EndpointException(req, "Unsupported product.", 404);
 
       int yield = 0;
@@ -114,7 +114,7 @@ public class RecipeCreationEndpoint extends JSONEndpoint {
         } catch(IllegalArgumentException e) { }
         
         if(null == iID
-            || !cookbook.getSupportedCommodities().contains(iID))
+            || !cookbook.getPantry().contains(iID))
           throw new EndpointException(req, "Unsupported ingredient.", 404);
 
         int quantity = 0;

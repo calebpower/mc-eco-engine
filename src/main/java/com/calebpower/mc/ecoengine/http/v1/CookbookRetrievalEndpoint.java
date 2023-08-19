@@ -82,7 +82,7 @@ public class CookbookRetrievalEndpoint extends JSONEndpoint {
                 .stream()
                 .map(c -> c.toString())
                 .collect(toJSONArr))
-            .put("commodities", cookbook.getSupportedCommodities()
+            .put("commodities", cookbook.getPantry()
                 .stream()
                 .map(c -> c.toString())
                 .collect(toJSONArr))
