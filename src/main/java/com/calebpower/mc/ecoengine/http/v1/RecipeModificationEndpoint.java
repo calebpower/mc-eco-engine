@@ -48,7 +48,7 @@ public class RecipeModificationEndpoint extends JSONEndpoint {
    * Instantiates the endpoint.
    */
   public RecipeModificationEndpoint() {
-    super("/cookbooks/:cookbook/recipes", APIVersion.VERSION_1, HTTPMethod.PATCH);
+    super("/cookbooks/:cookbook/recipes/:recipe", APIVersion.VERSION_1, HTTPMethod.PATCH);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
@@ -147,6 +147,8 @@ public class RecipeModificationEndpoint extends JSONEndpoint {
 
         recipe.replaceIngredients(ingredients);
       }
+
+      Database.getInstance().setRecipe(recipe);
 
       res.status(200);
       return new JSONObject()

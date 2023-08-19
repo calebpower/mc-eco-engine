@@ -61,7 +61,12 @@ public class Recipe {
     /**
      * Indicates that the item is smelted.
      */
-    SMELT
+    SMELT,
+
+    /**
+     * Indicates that waiting is required.
+     */
+    WAIT
   }
 
   /**
@@ -174,8 +179,8 @@ public class Recipe {
    * @param ingredients the new ingredients for this recipe
    */
   public void replaceIngredients(Map<UUID, Integer> ingredients) {
-    ingredients.clear();
-    ingredients.putAll(ingredients);
+    this.ingredients.clear();
+    this.ingredients.putAll(ingredients);
   }
 
   /**

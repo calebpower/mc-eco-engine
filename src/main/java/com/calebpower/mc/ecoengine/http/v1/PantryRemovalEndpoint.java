@@ -16,6 +16,7 @@
 package com.calebpower.mc.ecoengine.http.v1;
 
 import java.sql.SQLException;
+import java.util.Set;
 import java.util.UUID;
 
 import com.calebpower.mc.ecoengine.db.Database;
@@ -60,6 +61,11 @@ public class PantryRemovalEndpoint extends JSONEndpoint {
 
       if(null == commodity || !cookbook.getPantry().contains(commodity))
         throw new EndpointException(req, "Commodity not in pantry.", 404);
+
+      for(var recipe : Database.getInstance().getCookbookRecipes(cookbook.getID()))
+        if(0 == recipe.getProduct().compareTo(commodity)
+            || recipe.getIngredients().containsKey(commodity))
+          throw new EndpointException(req, "Commodity is in use by a recipe.", 409);
 
       cookbook.removeFromPantry(commodity);
       Database.getInstance().setCookbook(cookbook);

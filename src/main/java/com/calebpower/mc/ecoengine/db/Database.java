@@ -567,7 +567,7 @@ public class Database {
               "product",
               "product_yield",
               "work_method",
-              "work_amount",
+              "work_cost",
               "id")
           .toString());
       stmt.setBytes(1, SQLBuilder.uuidToBytes(recipe.getCookbook()));
@@ -602,7 +602,7 @@ public class Database {
             .where("recipe");
 
         for(int i = 0; i < staleIngredients.size(); i++) {
-          rmStaleIngredientStmt.where("ingredient");
+          rmStaleIngredientStmt.where("commodity");
           if(0 == i && 1 < staleIngredients.size())
             rmStaleIngredientStmt.or();
         }
