@@ -126,6 +126,7 @@ public class RecipeCreationEndpoint extends JSONEndpoint {
           throw new EndpointException(req, "Invalid ingredient quantity.", 400);
 
         recipe.setIngredient(iID, quantity);
+        Database.getInstance().setRecipe(recipe);
       }
 
       res.status(201);

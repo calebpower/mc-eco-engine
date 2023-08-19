@@ -23,43 +23,50 @@ import com.calebpower.mc.ecoengine.http.APIVersion;
 import com.calebpower.mc.ecoengine.http.EndpointException;
 import com.calebpower.mc.ecoengine.http.HTTPMethod;
 import com.calebpower.mc.ecoengine.http.JSONEndpoint;
+import com.calebpower.mc.ecoengine.model.Commodity;
 
 import org.json.JSONObject;
 
 import spark.Request;
 import spark.Response;
 
-/**
- * Facilitates the deletion of global commodities.
+/** Facilitates the deletion of global commodities.
  *
- * @author Caleb L. Power <cpower@axonibyte.com>
- */
+ * @author Caleb L. Power <cpower@axonibyte.com> */
 public class CommodityDeletionEndpoint extends JSONEndpoint {
-
-  /**
-   * Instantiates the endpoint.
-   */
+  
+  /** Instantiates the endpoint. */
   public CommodityDeletionEndpoint() {
     super("/commodities/:commodity", APIVersion.VERSION_1, HTTPMethod.DELETE);
   }
-
+  
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
-    UUID id = null;
     try {
-      id = UUID.fromString(req.params("commodity"));
-    } catch(IllegalArgumentException e) { }
-    
-    try {
-      if(!Database.getInstance().deleteCommodity(id))
+      Commodity commodity = null;
+      
+      try {
+        commodity = Database.getInstance().getCommodity(
+            UUID.fromString(
+                req.params("commodity")));
+      } catch(IllegalArgumentException e) { }
+      
+      if(null == commodity)
         throw new EndpointException(req, "Commodity not found.", 404);
+
+      for(var cookbook : Database.getInstance().getCookbooks())
+        if(cookbook.getPantry().contains(commodity.getID()))
+           throw new EndpointException(req, "Commodity is currently in use by a cookbook.", 409);
+      
+      Database.getInstance().deleteCommodity(commodity.getID());
+      
     } catch(SQLException e) {
       throw new EndpointException(req, "Database malfunction.", 503, e);
     }
-
+    
     res.status(200);
     return new JSONObject()
-      .put("status", "ok")
-      .put("info", "Deleted commodity.");
+        .put("status", "ok")
+        .put("info", "Deleted commodity.");
   }
   
 }
