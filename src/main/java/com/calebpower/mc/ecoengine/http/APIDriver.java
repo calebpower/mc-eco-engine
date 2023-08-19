@@ -16,6 +16,7 @@
 package com.calebpower.mc.ecoengine.http;
 
 import static spark.Spark.before;
+import static spark.Spark.notFound;
 import static spark.Spark.options;
 import static spark.Spark.port;
 import static spark.Spark.staticFiles;
@@ -25,6 +26,7 @@ import com.calebpower.mc.ecoengine.http.v1.*;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,6 +123,14 @@ public class APIDriver implements Runnable {
     for(Endpoint endpoint : endpoints)
       for(HTTPMethod method : endpoint.getHTTPMethods())
         method.getSparkMethod().accept(endpoint.getRoute(), endpoint::onRequest);
+
+    notFound((req, res) -> {
+      res.type("application/json");
+      return new JSONObject()
+        .put("status", "error")
+        .put("info", "Resource not found.")
+        .toString(2) + '\n';
+    });
   }
   
   /**

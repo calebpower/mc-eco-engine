@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS ${database}.${prefix}cookbook (
     DEFAULT CURRENT_TIMESTAMP
     ON UPDATE CURRENT_TIMESTAMP
     NOT NULL,
-  PRIMARY KEY (id)
-  FOREIGN KEY (parent) REFERENCES ${prefix}cookbook
+  PRIMARY KEY (id),
+  FOREIGN KEY (parent) REFERENCES ${prefix}cookbook (id)
     ON UPDATE CASCADE
     ON DELETE SET NULL
 )Engine=InnoDB;

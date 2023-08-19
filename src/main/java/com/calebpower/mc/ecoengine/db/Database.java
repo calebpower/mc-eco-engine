@@ -70,7 +70,7 @@ public class Database {
   public static void setInstance(Database instance) {
     Database.instance = instance;
   }
-  
+
   private HikariConfig hikariConfig = null;
   private HikariDataSource hikariDataSource = null;
   private String dbName = null;
@@ -241,7 +241,7 @@ public class Database {
             .tableAlias("c")
             .join(
                 Join.LEFT,
-                dbPrefix + "recipe_commodities",
+                dbPrefix + "ingredient",
                 "r",
                 "c.id",
                 "r.commodity",
@@ -299,12 +299,11 @@ public class Database {
         new SQLBuilder().select(
             dbPrefix + "commodity",
             "c.label",
-            "r.recipe",
-            "r.is_product")
+            "r.recipe")
         .tableAlias("c")
         .join(
             Join.LEFT,
-            dbPrefix + "recipe_commodities",
+            dbPrefix + "ingredient",
             "r",
             "c.id",
             "r.commodity",
@@ -377,6 +376,7 @@ public class Database {
           .toString());
       stmt.setString(1, commodity.getLabel());
       stmt.setBytes(2, SQLBuilder.uuidToBytes(commodity.getID()));
+      stmt.executeUpdate();
     }
 
     close(con, stmt, null);
@@ -603,7 +603,8 @@ public class Database {
 
         for(int i = 0; i < staleIngredients.size(); i++) {
           rmStaleIngredientStmt.where("ingredient");
-          if(0 == i) rmStaleIngredientStmt.or();
+          if(0 == i && 1 < staleIngredients.size())
+            rmStaleIngredientStmt.or();
         }
 
         close(null, stmt, null);
@@ -719,7 +720,8 @@ public class Database {
 
       for(int i = 0; i < cookbooks.size(); i++) {
         getChildrenStmt.where("parent");
-        if(0 == i) getChildrenStmt.or();
+        if(0 == i && 1 < cookbooks.size())
+          getChildrenStmt.or();
       }
 
       close(null, stmt, res);
@@ -827,7 +829,7 @@ public class Database {
 
     Connection con = getConnection();
     PreparedStatement stmt = con.prepareStatement(
-        new SQLBuilder().select(
+        new SQLBuilder().update(
             dbPrefix + "cookbook",
             "parent",
             "description")
@@ -876,7 +878,8 @@ public class Database {
 
         for(int i = 0; i < staleCommodities.size(); i++) {
           rmStaleCommodityStmt.where("commodity");
-          if(0 == i) rmStaleCommodityStmt.or();
+          if(0 == i && 1 < staleCommodities.size())
+            rmStaleCommodityStmt.or();
         }
 
         close(null, stmt, null);

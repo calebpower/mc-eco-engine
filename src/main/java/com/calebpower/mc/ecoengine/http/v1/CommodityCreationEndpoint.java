@@ -65,7 +65,7 @@ public class CommodityCreationEndpoint extends JSONEndpoint {
         .put("info", "Created commodity.")
         .put("commodity", new JSONObject()
              .put("id", id.toString())
-             .put("label", label));
+             .put("label", commodity.getLabel()));
       
     } catch(JSONException e) {
       throw new EndpointException(req, "Syntax error.", 400, e);

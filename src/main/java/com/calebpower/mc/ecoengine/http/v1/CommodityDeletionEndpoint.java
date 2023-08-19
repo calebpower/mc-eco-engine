@@ -40,7 +40,7 @@ public class CommodityDeletionEndpoint extends JSONEndpoint {
    * Instantiates the endpoint.
    */
   public CommodityDeletionEndpoint() {
-    super("/commodities/:commodity", APIVersion.VERSION_1, HTTPMethod.POST);
+    super("/commodities/:commodity", APIVersion.VERSION_1, HTTPMethod.DELETE);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
