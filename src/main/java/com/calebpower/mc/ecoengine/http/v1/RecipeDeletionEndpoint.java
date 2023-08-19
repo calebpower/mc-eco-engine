@@ -23,35 +23,45 @@ import com.calebpower.mc.ecoengine.http.APIVersion;
 import com.calebpower.mc.ecoengine.http.EndpointException;
 import com.calebpower.mc.ecoengine.http.HTTPMethod;
 import com.calebpower.mc.ecoengine.http.JSONEndpoint;
+import com.calebpower.mc.ecoengine.model.Recipe;
 
 import org.json.JSONObject;
 
 import spark.Request;
 import spark.Response;
 
-public class WorkbookDeletionEndpoint extends JSONEndpoint {
+public class RecipeDeletionEndpoint extends JSONEndpoint {
 
-  public WorkbookDeletionEndpoint() {
-    super("/workbooks/:workbook", APIVersion.VERSION_1, HTTPMethod.DELETE);
+  public RecipeDeletionEndpoint() {
+    super("/workbooks/:workbook/recipes/:recipe", APIVersion.VERSION_1, HTTPMethod.DELETE);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
-    UUID id = null;
     try {
-      id = UUID.fromString(req.params("workbook"));
-    } catch(IllegalArgumentException e) { }
+      UUID workbook = null;
+      Recipe recipe = null;
+      
+      try {
+        workbook = UUID.fromString(req.params("workbook"));
+        recipe = Database.getInstance().getRecipe(
+            UUID.fromString(
+                req.params("recipe")));
+      } catch(IllegalArgumentException e) { }
 
-    try {
-      if(!Database.getInstance().deleteWorkbook(id))
-        throw new EndpointException(req, "Workbook not found.", 404);
+      if(null == recipe
+          || null == workbook
+          || 0 != recipe.getWorkbook().compareTo(workbook)
+          || !Database.getInstance().deleteRecipe(recipe.getID()))
+        throw new EndpointException(req, "Recipe not found.", 404);
+
+      res.status(200);
+      return new JSONObject()
+        .put("status", "ok")
+        .put("info", "Deleted recipe.");
+      
     } catch(SQLException e) {
       throw new EndpointException(req, "Database malfunction.", 503, e);
     }
-
-    res.status(200);
-    return new JSONObject()
-      .put("status", "ok")
-      .put("info", "Deleted workbook.");
   }
   
 }

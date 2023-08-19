@@ -16,42 +16,60 @@
 package com.calebpower.mc.ecoengine.http.v1;
 
 import java.sql.SQLException;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collector;
 
 import com.calebpower.mc.ecoengine.db.Database;
 import com.calebpower.mc.ecoengine.http.APIVersion;
 import com.calebpower.mc.ecoengine.http.EndpointException;
 import com.calebpower.mc.ecoengine.http.HTTPMethod;
 import com.calebpower.mc.ecoengine.http.JSONEndpoint;
+import com.calebpower.mc.ecoengine.model.Recipe;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import spark.Request;
 import spark.Response;
 
-public class WorkbookDeletionEndpoint extends JSONEndpoint {
+public class RecipeListingEndpoint extends JSONEndpoint {
 
-  public WorkbookDeletionEndpoint() {
-    super("/workbooks/:workbook", APIVersion.VERSION_1, HTTPMethod.DELETE);
+  public RecipeListingEndpoint() {
+    super("/workbooks/:workbook/recipes", APIVersion.VERSION_1, HTTPMethod.GET);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
-    UUID id = null;
     try {
-      id = UUID.fromString(req.params("workbook"));
-    } catch(IllegalArgumentException e) { }
+      Set<Recipe> recipes = null;
+      UUID workbook = null;
 
-    try {
-      if(!Database.getInstance().deleteWorkbook(id))
+      try {
+        recipes = Database.getInstance().getWorkbookRecipes(
+            workbook = UUID.fromString(
+                req.params("workbook")));
+      } catch(IllegalArgumentException e) { }
+
+      if(null == recipes)
         throw new EndpointException(req, "Workbook not found.", 404);
+
+      res.status(200);
+      return new JSONObject()
+        .put("status", "ok")
+        .put("info", "Retrieved recipes.")
+        .put("workbook", workbook.toString())
+        .put("recipes", recipes
+             .stream()
+             .map(r -> r.getID().toString())
+             .collect(
+                 Collector.of(
+                     JSONArray::new,
+                     JSONArray::put,
+                     JSONArray::put)));
+      
     } catch(SQLException e) {
       throw new EndpointException(req, "Database malfunction.", 503, e);
     }
-
-    res.status(200);
-    return new JSONObject()
-      .put("status", "ok")
-      .put("info", "Deleted workbook.");
   }
   
 }

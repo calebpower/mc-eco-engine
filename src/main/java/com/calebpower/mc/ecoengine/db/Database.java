@@ -426,8 +426,9 @@ public class Database {
             dbPrefix + "recipe",
             "r.id",
             "r.product",
+            "r.product_yield",
             "r.work_method",
-            "r.work_amount",
+            "r.work_cost",
             "i.commodity",
             "i.amount")
         .tableAlias("r")
@@ -455,8 +456,9 @@ public class Database {
               workbook,
               SQLBuilder.bytesToUUID(
                   res.getBytes("product")),
+              res.getInt("product_yield"),
               Work.values()[res.getInt("work_method")],
-              res.getFloat("work_amount")));
+              res.getFloat("work_cost")));
 
       UUID commodity = SQLBuilder.bytesToUUID(res.getBytes("i.commodity"));
       if(null != commodity) recipe.setIngredient(commodity, res.getInt("amount"));
@@ -481,10 +483,11 @@ public class Database {
     PreparedStatement stmt = con.prepareStatement(
         new SQLBuilder().select(
             dbPrefix + "recipe",
-            "r.product",
             "r.workbook",
+            "r.product",
+            "r.product_yield",
             "r.work_method",
-            "r.work_amount",
+            "r.work_cost",
             "i.commodity",
             "i.amount")
         .tableAlias("r")
@@ -509,8 +512,9 @@ public class Database {
                 res.getBytes("workbook")),
             SQLBuilder.bytesToUUID(
                 res.getBytes("product")),
+            res.getInt("product_yield"),
             Work.values()[res.getInt("work_method")],
-            res.getFloat("work_amount"));
+            res.getFloat("work_cost"));
 
       UUID commodity = SQLBuilder.bytesToUUID(res.getBytes("i.commodity"));
       if(null != commodity) recipe.setIngredient(commodity, res.getInt("amount"));
@@ -537,17 +541,19 @@ public class Database {
     PreparedStatement stmt = con.prepareStatement(
         new SQLBuilder().update(
             dbPrefix + "recipe",
-            "product",
             "workbook",
+            "product",
+            "product_yield",
             "work_method",
-            "work_amount")
+            "work_cost")
         .where("id")
         .toString());
-    stmt.setBytes(1, SQLBuilder.uuidToBytes(recipe.getProduct()));
-    stmt.setBytes(2, SQLBuilder.uuidToBytes(recipe.getWorkbook()));
-    stmt.setInt(3, recipe.getWorkMethod().ordinal());
-    stmt.setFloat(4, recipe.getWorkAmount());
-    stmt.setBytes(5, idBytes);
+    stmt.setBytes(1, SQLBuilder.uuidToBytes(recipe.getWorkbook()));
+    stmt.setBytes(2, SQLBuilder.uuidToBytes(recipe.getProduct()));
+    stmt.setInt(3, recipe.getYield());
+    stmt.setInt(4, recipe.getWork().ordinal());
+    stmt.setFloat(5, recipe.getCost());
+    stmt.setBytes(6, idBytes);
 
     Map<UUID, Integer> ingredients = null;
 
@@ -557,17 +563,19 @@ public class Database {
       stmt = con.prepareStatement(
           new SQLBuilder().insert(
               dbPrefix + "recipe",
-              "product",
               "workbook",
+              "product",
+              "product_yield",
               "work_method",
               "work_amount",
               "id")
           .toString());
-      stmt.setBytes(1, SQLBuilder.uuidToBytes(recipe.getProduct()));
-      stmt.setBytes(2, SQLBuilder.uuidToBytes(recipe.getWorkbook()));
-      stmt.setInt(3, recipe.getWorkMethod().ordinal());
-      stmt.setFloat(4, recipe.getWorkAmount());
-      stmt.setBytes(5, idBytes);
+      stmt.setBytes(1, SQLBuilder.uuidToBytes(recipe.getWorkbook()));
+      stmt.setBytes(2, SQLBuilder.uuidToBytes(recipe.getProduct()));
+      stmt.setInt(3, recipe.getYield());
+      stmt.setInt(4, recipe.getWork().ordinal());
+      stmt.setFloat(5, recipe.getCost());
+      stmt.setBytes(6, idBytes);
       stmt.executeUpdate();
 
       ingredients = recipe.getIngredients();
