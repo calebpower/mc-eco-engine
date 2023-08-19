@@ -30,8 +30,16 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
+/**
+ * Facilitates the listing of known workbooks.
+ *
+ * @author Caleb L. Power <cpower@axonibyte.com>
+ */
 public class WorkbookListingEndpoint extends JSONEndpoint {
 
+  /**
+   * Instantiates the endpoint.
+   */
   public WorkbookListingEndpoint() {
     super("/workbooks", APIVersion.VERSION_1, HTTPMethod.GET);
   }

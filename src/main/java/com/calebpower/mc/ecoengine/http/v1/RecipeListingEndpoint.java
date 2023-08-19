@@ -33,8 +33,16 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
+/**
+ * Facilitates the listing of recipes in a workbook.
+ *
+ * @author Caleb L. Power <cpower@axonibyte.com>
+ */
 public class RecipeListingEndpoint extends JSONEndpoint {
 
+  /**
+   * Instantiates the endpoint.
+   */
   public RecipeListingEndpoint() {
     super("/workbooks/:workbook/recipes", APIVersion.VERSION_1, HTTPMethod.GET);
   }

@@ -29,12 +29,15 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Endpoint used to retrieve current configuration settings.
+ * Facilitates the retrieval of the current configuration state.
  *
  * @author Caleb L. Power <cpower@axonibyte.com>
  */
 public class ConfigRetrievalEndpoint extends JSONEndpoint {
 
+  /**
+   * Instantiates the endpoint.
+   */
   public ConfigRetrievalEndpoint() {
     super("/configs", APIVersion.VERSION_1, HTTPMethod.GET);
   }

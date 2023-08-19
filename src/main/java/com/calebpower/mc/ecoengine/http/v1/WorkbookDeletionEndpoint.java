@@ -29,8 +29,16 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
+/**
+ * Facilitates workbook deletion.
+ *
+ * @author Caleb L. Power <cpower@axonibyte.com>
+ */
 public class WorkbookDeletionEndpoint extends JSONEndpoint {
 
+  /**
+   * Instantiates the endpoint.
+   */
   public WorkbookDeletionEndpoint() {
     super("/workbooks/:workbook", APIVersion.VERSION_1, HTTPMethod.DELETE);
   }

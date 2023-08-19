@@ -31,8 +31,16 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
+/**
+ * Facilitates the modification of global commodities.
+ *
+ * @author Caleb L. Power <cpower@axonibyte.com>
+ */
 public class CommodityModificationEndpoint extends JSONEndpoint {
 
+  /**
+   * Instantiates the endpoint.
+   */
   public CommodityModificationEndpoint() {
     super("/commodities/:commodity", APIVersion.VERSION_1, HTTPMethod.PATCH);
   }

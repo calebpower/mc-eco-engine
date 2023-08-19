@@ -30,8 +30,16 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
+/**
+ * Facilitates the listing of global commodities.
+ *
+ * @author Caleb L. Power <cpower@axonibyte.com>
+ */
 public class CommodityListingEndpoint extends JSONEndpoint {
 
+  /**
+   * Instantiates the endpoint.
+   */
   public CommodityListingEndpoint() {
     super("/commodities", APIVersion.VERSION_1, HTTPMethod.GET);
   }

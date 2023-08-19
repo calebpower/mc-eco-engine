@@ -30,8 +30,16 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
+/**
+ * Facilitates the deletion of recipes from a workbook.
+ *
+ * @author Caleb L. Power <cpower@axonibyte.com>
+ */
 public class RecipeDeletionEndpoint extends JSONEndpoint {
 
+  /**
+   * Instantiates the endpoint.
+   */
   public RecipeDeletionEndpoint() {
     super("/workbooks/:workbook/recipes/:recipe", APIVersion.VERSION_1, HTTPMethod.DELETE);
   }

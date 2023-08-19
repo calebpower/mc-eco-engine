@@ -29,8 +29,16 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
+/**
+ * Facilitates the deletion of global commodities.
+ *
+ * @author Caleb L. Power <cpower@axonibyte.com>
+ */
 public class CommodityDeletionEndpoint extends JSONEndpoint {
 
+  /**
+   * Instantiates the endpoint.
+   */
   public CommodityDeletionEndpoint() {
     super("/commodities/:commodity", APIVersion.VERSION_1, HTTPMethod.POST);
   }

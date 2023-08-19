@@ -32,8 +32,16 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
+/**
+ * Facilitates the retrieval of an individual recipe.
+ *
+ * @author Caleb L. Power <cpower@axonibyte.com>
+ */
 public class RecipeRetrievalEndpoint extends JSONEndpoint {
 
+  /**
+   * Instantiates the endpoint.
+   */
   public RecipeRetrievalEndpoint() {
     super("/workbooks/:workbook/recipes/:recipe", APIVersion.VERSION_1, HTTPMethod.GET);
   }

@@ -37,8 +37,16 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
+/**
+ * Facilitates the modification of a recipe in a workbook.
+ *
+ * @author Caleb L. Power <cpower@axonibyte.com>
+ */
 public class RecipeModificationEndpoint extends JSONEndpoint {
 
+  /**
+   * Instantiates the endpoint.
+   */
   public RecipeModificationEndpoint() {
     super("/workbooks/:workbook/recipes", APIVersion.VERSION_1, HTTPMethod.PATCH);
   }

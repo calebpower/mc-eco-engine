@@ -31,8 +31,16 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
+/**
+ * Facilitates the creation of global commodities.
+ *
+ * @author Caleb L. Power <cpower@axonibyte.com>
+ */
 public class CommodityCreationEndpoint extends JSONEndpoint {
 
+  /**
+   * Instantiates the endpoint.
+   */
   public CommodityCreationEndpoint() {
     super("/commodities", APIVersion.VERSION_1, HTTPMethod.POST);
   }

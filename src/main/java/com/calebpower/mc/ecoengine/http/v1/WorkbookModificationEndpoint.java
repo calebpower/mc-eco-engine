@@ -32,8 +32,16 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
+/**
+ * Facilitates workbook modification.
+ *
+ * @author Caleb L. Power <cpower@axonibyte.com>
+ */
 public class WorkbookModificationEndpoint extends JSONEndpoint {
 
+  /**
+   * Instantiates the endpoint.
+   */
   public WorkbookModificationEndpoint() {
     super("/workbooks/:workbook", APIVersion.VERSION_1, HTTPMethod.PATCH);
   }

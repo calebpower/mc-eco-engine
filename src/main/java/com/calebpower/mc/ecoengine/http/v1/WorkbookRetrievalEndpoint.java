@@ -33,8 +33,16 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
+/**
+ * Facilitates workbook retrieval.
+ *
+ * @author Caleb L. Power <cpower@axonibyte.com>
+ */
 public class WorkbookRetrievalEndpoint extends JSONEndpoint {
-  
+
+  /**
+   * Instantiates the endpoint.
+   */
   public WorkbookRetrievalEndpoint() {
     super("/workbooks/:workbook", APIVersion.VERSION_1, HTTPMethod.GET);
   }

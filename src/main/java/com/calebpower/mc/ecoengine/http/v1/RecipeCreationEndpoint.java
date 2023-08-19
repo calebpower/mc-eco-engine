@@ -35,8 +35,16 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
+/**
+ * Facilitates the creation of workbook recipes.
+ *
+ * @author Caleb L. Power <cpower@axonibyte.com>
+ */
 public class RecipeCreationEndpoint extends JSONEndpoint {
 
+  /**
+   * Instantiates the endpoint.
+   */
   public RecipeCreationEndpoint() {
     super("/workbooks/:workbook/recipes", APIVersion.VERSION_1, HTTPMethod.POST);
   }
