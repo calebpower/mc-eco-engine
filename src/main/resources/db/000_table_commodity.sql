@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS ${database}.${prefix}commodity (
+  id BINARY(16) NOT NULL,
+  label VARCHAR(255) NOT NULL,
+  last_update TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
+    ON UPDATE CURRENT_TIMESTAMP
+    NOT NULL,
+  PRIMARY KEY (id)
+)Engine=InnoDB;

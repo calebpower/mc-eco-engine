@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2020-2023 Axonibyte Innovations, LLC. All rights reserved.
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *   https://www.apache.org/licenses/LICENSE-2.0
  *
@@ -16,6 +16,7 @@
 package com.calebpower.mc.ecoengine.http;
 
 import static spark.Spark.before;
+import static spark.Spark.notFound;
 import static spark.Spark.options;
 import static spark.Spark.port;
 import static spark.Spark.staticFiles;
@@ -25,6 +26,7 @@ import com.calebpower.mc.ecoengine.http.v1.*;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +65,25 @@ public class APIDriver implements Runnable {
     this.port = port;
     
     endpoints = new Endpoint[] {
-      new ConfigRetrievalEndpoint()
+      new CommodityCreationEndpoint(),
+      new CommodityDeletionEndpoint(),
+      new CommodityListingEndpoint(),
+      new CommodityModificationEndpoint(),
+      new CommodityRetrievalEndpoint(),
+      new ConfigRetrievalEndpoint(),
+      new CookbookCreationEndpoint(),
+      new CookbookDeletionEndpoint(),
+      new CookbookListingEndpoint(),
+      new CookbookModificationEndpoint(),
+      new CookbookRetrievalEndpoint(),
+      new PantryAdditionEndpoint(),
+      new PantryListingEndpoint(),
+      new PantryRemovalEndpoint(),
+      new RecipeCreationEndpoint(),
+      new RecipeDeletionEndpoint(),
+      new RecipeListingEndpoint(),
+      new RecipeModificationEndpoint(),
+      new RecipeRetrievalEndpoint()
     };
     
     staticFiles.location(staticFolder); // relative to the root of the classpath
@@ -106,6 +126,14 @@ public class APIDriver implements Runnable {
     for(Endpoint endpoint : endpoints)
       for(HTTPMethod method : endpoint.getHTTPMethods())
         method.getSparkMethod().accept(endpoint.getRoute(), endpoint::onRequest);
+
+    notFound((req, res) -> {
+      res.type("application/json");
+      return new JSONObject()
+        .put("status", "error")
+        .put("info", "Resource not found.")
+        .toString(2) + '\n';
+    });
   }
   
   /**

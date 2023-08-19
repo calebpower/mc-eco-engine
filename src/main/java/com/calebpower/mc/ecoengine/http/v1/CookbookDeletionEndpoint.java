@@ -15,49 +15,51 @@
  */
 package com.calebpower.mc.ecoengine.http.v1;
 
-import com.calebpower.mc.ecoengine.config.Config;
-import com.calebpower.mc.ecoengine.config.Config.ConfigParam;
+import java.sql.SQLException;
+import java.util.UUID;
+
+import com.calebpower.mc.ecoengine.db.Database;
 import com.calebpower.mc.ecoengine.http.APIVersion;
 import com.calebpower.mc.ecoengine.http.EndpointException;
 import com.calebpower.mc.ecoengine.http.HTTPMethod;
 import com.calebpower.mc.ecoengine.http.JSONEndpoint;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import spark.Request;
 import spark.Response;
 
 /**
- * Facilitates the retrieval of the current configuration state.
+ * Facilitates cookbook deletion.
  *
  * @author Caleb L. Power <cpower@axonibyte.com>
  */
-public class ConfigRetrievalEndpoint extends JSONEndpoint {
+public class CookbookDeletionEndpoint extends JSONEndpoint {
 
   /**
    * Instantiates the endpoint.
    */
-  public ConfigRetrievalEndpoint() {
-    super("/configs", APIVersion.VERSION_1, HTTPMethod.GET);
+  public CookbookDeletionEndpoint() {
+    super("/cookbooks/:cookbook", APIVersion.VERSION_1, HTTPMethod.DELETE);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
-    JSONArray cfgOptions = new JSONArray();
-    Config config = Config.getInstance();
-    for(var param : ConfigParam.values())
-      cfgOptions.put(
-          new JSONObject()
-              .put(
-                  param.toString(),
-                  config.canResolve(param)
-                      ? config.getString(param)
-                      : JSONObject.NULL));
+    UUID id = null;
+    try {
+      id = UUID.fromString(req.params("cookbook"));
+    } catch(IllegalArgumentException e) { }
 
+    try {
+      if(!Database.getInstance().deleteCookbook(id))
+        throw new EndpointException(req, "Cookbook not found.", 404);
+    } catch(SQLException e) {
+      throw new EndpointException(req, "Database malfunction.", 503, e);
+    }
+
+    res.status(200);
     return new JSONObject()
       .put("status", "ok")
-      .put("info", "Retrieved configs.")
-      .put("configs", cfgOptions);
+      .put("info", "Deleted cookbook.");
   }
   
 }

@@ -15,8 +15,10 @@
  */
 package com.calebpower.mc.ecoengine.http.v1;
 
-import com.calebpower.mc.ecoengine.config.Config;
-import com.calebpower.mc.ecoengine.config.Config.ConfigParam;
+import java.sql.SQLException;
+import java.util.stream.Collector;
+
+import com.calebpower.mc.ecoengine.db.Database;
 import com.calebpower.mc.ecoengine.http.APIVersion;
 import com.calebpower.mc.ecoengine.http.EndpointException;
 import com.calebpower.mc.ecoengine.http.HTTPMethod;
@@ -29,35 +31,46 @@ import spark.Request;
 import spark.Response;
 
 /**
- * Facilitates the retrieval of the current configuration state.
+ * Facilitates the listing of known cookbooks.
  *
  * @author Caleb L. Power <cpower@axonibyte.com>
  */
-public class ConfigRetrievalEndpoint extends JSONEndpoint {
+public class CookbookListingEndpoint extends JSONEndpoint {
 
   /**
    * Instantiates the endpoint.
    */
-  public ConfigRetrievalEndpoint() {
-    super("/configs", APIVersion.VERSION_1, HTTPMethod.GET);
+  public CookbookListingEndpoint() {
+    super("/cookbooks", APIVersion.VERSION_1, HTTPMethod.GET);
   }
 
   @Override public JSONObject doEndpointTask(Request req, Response res) throws EndpointException {
-    JSONArray cfgOptions = new JSONArray();
-    Config config = Config.getInstance();
-    for(var param : ConfigParam.values())
-      cfgOptions.put(
-          new JSONObject()
+    try {
+      JSONArray cookbookArr = Database.getInstance()
+          .getCookbooks()
+          .stream()
+          .map(w -> new JSONObject()
+              .put("id", w.getID().toString())
+              .put("description", w.getDescription())
               .put(
-                  param.toString(),
-                  config.canResolve(param)
-                      ? config.getString(param)
-                      : JSONObject.NULL));
+                  "parent",
+                  null == w.getParent()
+                      ? JSONObject.NULL
+                      : w.getParent().toString()))
+          .collect(
+              Collector.of(
+                  JSONArray::new,
+                  JSONArray::put,
+                  JSONArray::put));
 
-    return new JSONObject()
-      .put("status", "ok")
-      .put("info", "Retrieved configs.")
-      .put("configs", cfgOptions);
+      res.status(200);
+      return new JSONObject()
+        .put("status", "ok")
+        .put("info", "Retrieved cookbooks.")
+        .put("cookbooks", cookbookArr);
+    } catch(SQLException e) {
+      throw new EndpointException(req, "Database malfunction.", 503, e);
+    }
   }
   
 }
