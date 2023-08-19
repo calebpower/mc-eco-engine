@@ -139,7 +139,7 @@ public class RecipeCreationEndpoint extends JSONEndpoint {
               .put("yield", yield)
               .put("work", work.name())
               .put("cost", cost)
-              .put("ingredients", recipe.getIngredients().entrySet()
+              .put("ingredients", (JSONArray)recipe.getIngredients().entrySet()
                   .stream()
                   .map(i -> new JSONObject()
                       .put("id", i.getKey().toString())

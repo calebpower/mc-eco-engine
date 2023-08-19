@@ -66,7 +66,7 @@ public class RecipeListingEndpoint extends JSONEndpoint {
         .put("status", "ok")
         .put("info", "Retrieved recipes.")
         .put("cookbook", cookbook.toString())
-        .put("recipes", recipes
+        .put("recipes", (JSONArray)recipes
              .stream()
              .map(r -> r.getID().toString())
              .collect(

@@ -74,7 +74,7 @@ public class RecipeRetrievalEndpoint extends JSONEndpoint {
             .put("yield", recipe.getYield())
             .put("work", recipe.getWork().name())
             .put("cost", recipe.getCost())
-            .put("ingredients", recipe.getIngredients().entrySet()
+            .put("ingredients", (JSONArray)recipe.getIngredients().entrySet()
                 .stream()
                 .map(i -> new JSONObject()
                     .put("id", i.getKey().toString())

@@ -63,7 +63,22 @@ public class APIDriver implements Runnable {
     this.port = port;
     
     endpoints = new Endpoint[] {
-      new ConfigRetrievalEndpoint()
+      new CommodityCreationEndpoint(),
+      new CommodityDeletionEndpoint(),
+      new CommodityListingEndpoint(),
+      new CommodityModificationEndpoint(),
+      new CommodityRetrievalEndpoint(),
+      new ConfigRetrievalEndpoint(),
+      new CookbookCreationEndpoint(),
+      new CookbookDeletionEndpoint(),
+      new CookbookListingEndpoint(),
+      new CookbookModificationEndpoint(),
+      new CookbookRetrievalEndpoint(),
+      new RecipeCreationEndpoint(),
+      new RecipeDeletionEndpoint(),
+      new RecipeListingEndpoint(),
+      new RecipeModificationEndpoint(),
+      new RecipeRetrievalEndpoint()
     };
     
     staticFiles.location(staticFolder); // relative to the root of the classpath
