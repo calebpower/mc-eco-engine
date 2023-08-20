@@ -25,6 +25,7 @@ import com.calebpower.mc.ecoengine.http.EndpointException;
 import com.calebpower.mc.ecoengine.http.HTTPMethod;
 import com.calebpower.mc.ecoengine.http.JSONEndpoint;
 import com.calebpower.mc.ecoengine.model.Cookbook;
+import com.calebpower.mc.ecoengine.model.Recipe;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,6 +73,14 @@ public class CookbookCreationEndpoint extends JSONEndpoint {
       Cookbook cookbook = new Cookbook(id, parent, description);
       Database.getInstance().setCookbook(cookbook);
       cookbook = Database.getInstance().getCookbook(id);
+      
+      if(null != parent) {
+        for(var r : Database.getInstance().getCookbookRecipes(parent.getID())) {
+          UUID rID = null;
+          do id = UUID.randomUUID(); while(null != Database.getInstance().getRecipe(id));
+          Database.getInstance().setRecipe(new Recipe(rID, r));
+        }
+      }
 
       final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
       res.status(201);
