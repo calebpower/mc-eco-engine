@@ -6,13 +6,10 @@ configurations and settings for an economy-driven Minecraft server.
 This project is in no way, shape, or form associated with or explicitly
 sanctioned by either Microsoft or Mojang.
 
-# Installation
+# Installation and Usage
 
-Installation instructions to be provided at a later date.
-
-# Execution
-
-Execution instructions to be provided at a later date.
+Check out the [wiki](https://github.com/calebpower/mc-eco-engine/wiki) to learn
+how to install, configure, and otherwise use this software.
 
 # License and Copyright
 
