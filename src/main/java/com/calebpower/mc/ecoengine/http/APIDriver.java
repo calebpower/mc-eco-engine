@@ -71,6 +71,7 @@ public class APIDriver implements Runnable {
       new CommodityModificationEndpoint(),
       new CommodityRetrievalEndpoint(),
       new ConfigRetrievalEndpoint(),
+      new CookbookAnalysisEndpoint(),
       new CookbookCreationEndpoint(),
       new CookbookDeletionEndpoint(),
       new CookbookListingEndpoint(),

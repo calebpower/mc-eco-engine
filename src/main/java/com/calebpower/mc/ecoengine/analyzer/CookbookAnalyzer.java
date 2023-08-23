@@ -71,7 +71,7 @@ public class CookbookAnalyzer {
    *
    * @return the {@link Analysis} results
    */
-  public Analysis analyze() {
+  public Analysis analyze() {    
     Analysis analysis = new Analysis();
 
     for(var commodity : commodities.keySet()) {
@@ -92,24 +92,26 @@ public class CookbookAnalyzer {
     Set<UUID> appended = new HashSet<>(chain);
     int validRecipes = 0;
 
-    recipes: for(var recipe : recipes.get(commodity)) {
-      float cost = 0f;
-      for(var ingredient : recipe.getIngredients().entrySet()) {
-        if(chain.contains(ingredient.getKey())) continue recipes; // prevent infinite loop
-        
-        try {
-          cost += getValue(ingredient.getKey(), appended) * ingredient.getValue();
-        } catch(NonfungibleCommodityException e) {
-          continue recipes;
+    if(recipes.containsKey(commodity)) {
+      recipes: for(var recipe : recipes.get(commodity)) {
+        float cost = 0f;
+        for(var ingredient : recipe.getIngredients().entrySet()) {
+          if(chain.contains(ingredient.getKey())) continue recipes; // prevent infinite loop
+          
+          try {
+            cost += getValue(ingredient.getKey(), appended) * ingredient.getValue();
+          } catch(NonfungibleCommodityException e) {
+            continue recipes;
+          }
         }
+        
+        cost = Work.PURCHASE == recipe.getWork() ? cost + recipe.getCost() : cost * recipe.getCost();
+        
+        if(minCost >= cost)
+          minCost = cost;
+        
+        validRecipes++;
       }
-      
-      cost = Work.PURCHASE == recipe.getWork() ? cost + recipe.getCost() : cost * recipe.getCost();
-      
-      if(minCost >= cost)
-        minCost = cost;
-
-      validRecipes++;
     }
 
     if(0 == validRecipes) throw new NonfungibleCommodityException(commodities.get(commodity));
