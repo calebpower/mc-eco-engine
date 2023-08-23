@@ -130,11 +130,8 @@ public class CookbookAnalyzer {
     Analysis a1 = analyze();
     Analysis a2 = new CookbookAnalyzer(cookbook).analyze();
 
-    Set<UUID> commodityUnion = new HashSet<>(commodities.keySet());
-    commodityUnion.addAll(cookbook.getPantry());
-
     Diff diff = new Diff(a1, a2);
-    for(var commodity : commodityUnion) {
+    for(var commodity : diff.getCommodityUnion()) {
       if(commodities.containsKey(commodity) && cookbook.getPantry().contains(commodity)) {
         diff.addModifiedCommodity(
             commodity,

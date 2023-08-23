@@ -42,10 +42,27 @@ public class Diff {
    * @param a2 the analysis associated with the newer cookbook
    */
   public Diff(Analysis a1, Analysis a2) {
+    Objects.requireNonNull(a1);
+    Objects.requireNonNull(a2);
     this.a1 = a1;
     this.a2 = a2;
   }
 
+  /**
+   * Retrieves the union of all known commodities across both cookbooks
+   * represented by this diff.
+   *
+   * @return a {@link Set} of {@link UUID} objects associated with various
+   *         commodities
+   */
+  public Set<UUID> getCommodityUnion() {
+    Set<UUID> union = new HashSet<>(a1.getFungibleCommodities().keySet());
+    union.addAll(a1.getNonfungibleCommodities());
+    union.addAll(a2.getFungibleCommodities().keySet());
+    union.addAll(a2.getNonfungibleCommodities());
+    return union;
+  }
+  
   /**
    * Retrieves the analysis associated with the older cookbook.
    *
