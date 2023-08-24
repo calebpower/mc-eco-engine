@@ -104,7 +104,8 @@ public class CookbookAnalyzer {
             continue recipes;
           }
         }
-        
+
+        cost /= recipe.getYield();
         cost = Work.PURCHASE == recipe.getWork() ? cost + recipe.getCost() : cost * recipe.getCost();
         
         if(minCost >= cost)

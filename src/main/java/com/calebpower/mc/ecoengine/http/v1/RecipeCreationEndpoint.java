@@ -117,6 +117,9 @@ public class RecipeCreationEndpoint extends JSONEndpoint {
             || !cookbook.getPantry().contains(iID))
           throw new EndpointException(req, "Unsupported ingredient.", 404);
 
+        if(recipe.getIngredients().containsKey(iID))
+          throw new EndpointException(req, "Duplicate ingredient.", 400);
+
         int quantity = 0;
         try {
           quantity = ingredient.getInt("quantity");
@@ -126,8 +129,12 @@ public class RecipeCreationEndpoint extends JSONEndpoint {
           throw new EndpointException(req, "Invalid ingredient quantity.", 400);
 
         recipe.setIngredient(iID, quantity);
-        Database.getInstance().setRecipe(recipe);
       }
+
+      if(recipe.getIngredients().containsKey(product))
+        throw new EndpointException(req, "Product cannot be ingredient.", 400);
+      
+      Database.getInstance().setRecipe(recipe);
 
       res.status(201);
       return new JSONObject()
