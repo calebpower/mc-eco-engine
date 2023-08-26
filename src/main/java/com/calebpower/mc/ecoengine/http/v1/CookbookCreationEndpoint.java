@@ -52,7 +52,7 @@ public class CookbookCreationEndpoint extends JSONEndpoint {
       JSONObject reqBody = new JSONObject(req.body());
       
       Cookbook parent = null;
-      if(reqBody.has("parent")) {
+      if(reqBody.has("parent") && !reqBody.isNull("parent")) {
         try {
           parent = Database.getInstance().getCookbook(
               UUID.fromString(
