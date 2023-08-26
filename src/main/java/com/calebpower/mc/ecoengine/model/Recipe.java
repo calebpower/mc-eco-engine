@@ -44,29 +44,42 @@ public class Recipe {
   public static enum Work {
 
     /**
-     * Indicates that the item is purchased.
+     * Indicates that the item is purchased. In this case, any ingredients
+     * present indicate that they are required items for the purchase in
+     * addition to the flat cost.
      */
     PURCHASE,
 
     /**
-     * Indicates that the item is gathered or mined.
+     * Indicates that the item is gathered or mined. During analysis, the cost
+     * is multiplied by the sum of the ingredient costs.
      */
     OBTAIN,
 
     /**
-     * Indicates that the item is crafted.
+     * Indicates that the item is crafted. During analysis, the cost is
+     * is multiplied by the sum of the ingredient costs.
      */
     CRAFT,
 
     /**
-     * Indicates that the item is smelted.
+     * Indicates that the item is smelted. During analysis, the cost is
+     * multiplied by the sum of the ingredient costs.
      */
     SMELT,
 
     /**
-     * Indicates that waiting is required.
+     * Indicates that waiting is required. During analysis, the cost is
+     * multiplied by the sum of the ingredient costs.
      */
-    WAIT
+    WAIT,
+
+    /**
+     * Indicates that the item is being sold. In this case, the product yield
+     * and ingredients are basically reversed in the transaction--that is,
+     * you are selling the product and getting the items / cost in payment.
+     */
+    SELL
   }
 
   /**
