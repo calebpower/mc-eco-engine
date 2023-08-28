@@ -67,6 +67,24 @@ public class CommodityModificationEndpoint extends JSONEndpoint {
         commodity.setLabel(label.strip());
       }
 
+      if(reqBody.has("abstraction")) {
+        UUID abstraction = null;
+        
+        if(!reqBody.isNull("abstraction")) {
+          Commodity a = null;
+          
+          try {
+            abstraction = UUID.fromString(reqBody.getString("abstraction"));
+            a = Database.getInstance().getCommodity(abstraction);
+          } catch(IllegalArgumentException e) { }
+          
+          if(null == a)
+            throw new EndpointException(req, "Abstraction not found.", 404);
+        }
+        
+        commodity.setAbstraction(abstraction);
+      }
+
       Database.getInstance().setCommodity(commodity);
 
       res.status(200);

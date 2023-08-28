@@ -28,9 +28,11 @@ import java.util.UUID;
 public class Commodity {
 
   private UUID id = null;
+  private UUID abstraction = null;
   private String label = null;
   private Set<UUID> recipes = new HashSet<>();
   private Set<UUID> usages = new HashSet<>();
+  private Set<UUID> implementations = new HashSet<>();
 
   /**
    * Instantiates a {@link Commodity} object.
@@ -38,8 +40,9 @@ public class Commodity {
    * @param id the unique {@link UUID}
    * @param label the human-readable description
    */
-  public Commodity(UUID id, String label) {
+  public Commodity(UUID id, UUID abstraction, String label) {
     this.id = id;
+    this.abstraction = abstraction;
     this.label = label;
   }
 
@@ -113,7 +116,7 @@ public class Commodity {
    * Adds a usage to the set of known usages for this commidity. That is, adds
    * the unique identifier of a recipe for which this commodity is an ingredient.
    *
-   * @param usgae the unique {@link UUID} of some recipe
+   * @param usage the unique {@link UUID} of some recipe
    */
   public void addUsage(UUID usage) {
     this.usages.add(usage);
@@ -126,6 +129,59 @@ public class Commodity {
    */
   public void removeUsage(UUID usage) {
     this.usages.remove(usage);
+  }
+
+  /**
+   * Retrieves the unique identifier of the commodity that serves as the
+   * abstraction for this one.
+   *
+   * @return a {@link UUID} serving as the unique ID of the abstraction
+   */
+  public UUID getAbstraction() {
+    return abstraction;
+  }
+
+  /**
+   * Sets the unique identifier of the commodity that serves as the abstraction
+   * for this one.
+   *
+   * @param commodity the {@link UUID} serving as the unique ID of the
+   *        abstraction, or {@code null} if there is no abstraction
+   */
+  public void setAbstraction(UUID commodity) {
+    this.abstraction = commodity;
+  }
+  
+  /**
+   * Retrieves the set of implementations for which this commodity serves as the
+   * abstraction.
+   *
+   * @return an unmodifiable {@link Set} of unique {@link UUID} objects
+   */
+  public Set<UUID> getImplementations() {
+    return Collections.unmodifiableSet(implementations);
+  }
+
+  /**
+   * Adds an implementation to the set of known implementations for which this
+   * commodity is an abstraction.
+   *
+   * @param commodity the {@link UUID} associated with the commodity
+   *        implementing this abstraction
+   */
+  public void addImplementation(UUID commodity) {
+    this.implementations.add(commodity);
+  }
+
+  /**
+   * Removes an implementation from the set of known implementations for which
+   * this commodity serves as the abstraction.
+   *
+   * @param commodity the {@link UUID} of the commodity that no longer
+   *        implements this abstraction
+   */
+  public void removeImplementation(UUID commodity) {
+    this.implementations.remove(commodity);
   }
   
 }

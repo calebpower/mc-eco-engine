@@ -53,10 +53,23 @@ public class CommodityCreationEndpoint extends JSONEndpoint {
       if(label.isBlank())
         throw new EndpointException(req, "Invalid label.", 400);
 
+      UUID abstraction = null;
+      if(reqBody.has("abstraction") && !reqBody.isNull("abstraction")) {
+        Commodity a = null;
+        
+        try {
+          abstraction = UUID.fromString(reqBody.getString("abstraction"));
+          a = Database.getInstance().getCommodity(abstraction);
+        } catch(IllegalArgumentException e) { }
+        
+        if(null == a)
+          throw new EndpointException(req, "Abstraction not found.", 404);
+      }
+
       UUID id = null;
       do id = UUID.randomUUID(); while(null != Database.getInstance().getCommodity(id));
 
-      Commodity commodity = new Commodity(id, label.strip());
+      Commodity commodity = new Commodity(id, abstraction, label.strip());
       Database.getInstance().setCommodity(commodity);
 
       res.status(201);

@@ -51,7 +51,8 @@ public class CommodityListingEndpoint extends JSONEndpoint {
         .stream()
         .map(c -> new JSONObject()
              .put("id", c.getID().toString())
-             .put("label", c.getLabel()))
+             .put("label", c.getLabel())
+             .put("abstraction", c.getAbstraction().toString()))
         .collect(
             Collector.of(
                 JSONArray::new,

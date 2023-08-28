@@ -237,6 +237,7 @@ public class Database {
             dbPrefix + "commodity",
             "c.id",
             "c.label",
+            "c.abstraction",
             "r.recipe")
             .tableAlias("c")
             .join(
@@ -255,7 +256,12 @@ public class Database {
       if(commodities.containsKey(id))
         commodity = commodities.get(id);
       else
-        commodities.put(id, commodity = new Commodity(id, res.getString("c.label")));
+        commodities.put(
+            id,
+            commodity = new Commodity(
+                id,
+                SQLBuilder.bytesToUUID(res.getBytes("c.abstraction")),
+                res.getString("c.label")));
       
       UUID recipe = SQLBuilder.bytesToUUID(res.getBytes("r.recipe"));
       if(null != recipe) commodity.addUsage(recipe);
@@ -275,6 +281,36 @@ public class Database {
 
       while(res.next())
         commodities.get(id).addRecipe(
+            SQLBuilder.bytesToUUID(
+                res.getBytes("id")));
+    }
+
+    if(!commodities.isEmpty()) {
+      close(null, stmt, res);
+      SQLBuilder implementationQuery = new SQLBuilder().select(
+          dbPrefix + "commodity",
+          "id",
+          "abstraction");
+
+      for(int i = 0; i < commodities.size(); i++) {
+        implementationQuery.where("abstraction");
+        if(0 == i && 1 < commodities.size())
+          implementationQuery.or();
+      }
+
+      stmt = con.prepareStatement(implementationQuery.toString());
+
+      var idx = 0;
+      for(var id : commodities.keySet())
+        stmt.setBytes(
+            ++idx,
+            SQLBuilder.uuidToBytes(id));
+
+      res = stmt.executeQuery();
+      commodities.get(
+          SQLBuilder.bytesToUUID(
+              res.getBytes("abstraction")))
+        .addImplementation(
             SQLBuilder.bytesToUUID(
                 res.getBytes("id")));
     }
@@ -299,6 +335,7 @@ public class Database {
         new SQLBuilder().select(
             dbPrefix + "commodity",
             "c.label",
+            "c.abstraction",
             "r.recipe")
         .tableAlias("c")
         .join(
@@ -316,7 +353,11 @@ public class Database {
     Commodity commodity = null;
     while(res.next()) {
       if(null == commodity)
-        commodity = new Commodity(id, res.getString("c.label"));
+        commodity = new Commodity(
+            id,
+            SQLBuilder.bytesToUUID(
+                res.getBytes("c.abstraction")),
+            res.getString("c.label"));
       
       UUID recipe = SQLBuilder.bytesToUUID(res.getBytes("r.recipe"));
       if(null != recipe) commodity.addUsage(recipe);
@@ -335,6 +376,21 @@ public class Database {
       
       while(res.next())
         commodity.addRecipe(
+            SQLBuilder.bytesToUUID(
+                res.getBytes("id")));
+
+      close(null, stmt, res);
+      stmt = con.prepareStatement(
+          new SQLBuilder().select(
+              dbPrefix + "commodity",
+              "id")
+          .where("abstraction")
+          .toString());
+      stmt.setBytes(1, SQLBuilder.uuidToBytes(id));
+      res = stmt.executeQuery();
+
+      while(res.next())
+        commodity.addImplementation(
             SQLBuilder.bytesToUUID(
                 res.getBytes("id")));
     }
@@ -359,11 +415,13 @@ public class Database {
     PreparedStatement stmt = con.prepareStatement(
         new SQLBuilder().update(
             dbPrefix + "commodity",
+            "abstraction",
             "label")
         .where("id")
         .toString());
     stmt.setString(1, commodity.getLabel());
-    stmt.setBytes(2, SQLBuilder.uuidToBytes(commodity.getID()));
+    stmt.setBytes(2, SQLBuilder.uuidToBytes(commodity.getAbstraction()));
+    stmt.setBytes(3, SQLBuilder.uuidToBytes(commodity.getID()));
 
     boolean isNew = false;
     if(isNew = 0 >= stmt.executeUpdate()) {
@@ -372,9 +430,11 @@ public class Database {
           new SQLBuilder().insert(
               dbPrefix + "commodity",
               "label",
+              "abstraction",
               "id")
           .toString());
       stmt.setString(1, commodity.getLabel());
+      stmt.setBytes(2, SQLBuilder.uuidToBytes(commodity.getAbstraction()));
       stmt.setBytes(2, SQLBuilder.uuidToBytes(commodity.getID()));
       stmt.executeUpdate();
     }
